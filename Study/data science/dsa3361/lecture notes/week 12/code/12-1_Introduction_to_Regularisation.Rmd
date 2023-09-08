@@ -1,0 +1,377 @@
+---
+title: "12-1 Introduction to Regularisation"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **12-1 Introduction to Regularisation**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will work with the `carprice_sample` data set. Before proceeding, place the data set `carprice_sample.xlsx` in the `data` folder. This R markdown file itself, `12-1_Introduction_to_Regularisation.rmd`, should be placed in `src` folder.
+
+### Load Libraries
+
+We load the packages using the `library()` function. Ensure that the packages are installed before doing this.
+
+```{r message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readxl)
+library(corrplot)
+library(car)
+library(DescTools)
+library(glmnet)
+```
+
+### Helper Functions
+
+In the following code, we define the function `eval_results(true, predict)` to return the evaluation metrics for a given model.
+
+```{r}
+eval_results <- function(true, predict) {
+  actual <- data.matrix(true)
+  SSE <- sum((predict - actual)^2)
+  SST <- sum((actual - mean(actual))^2)
+  R_square <- 1 - SSE / SST
+  data.frame(
+    MSE = MSE(predict, true),
+    MAE = MAE(predict, true),
+    RMSE = RMSE(predict, true),
+    MAPE = MAPE(predict, true),
+    Rsquare = R_square
+  )
+}
+```
+
+### Slide 11
+
+The data is in the Excel `.xlsx` format. We will use the `read_excel()` function from the `readxl` package to read in this data. The output of `read_excel()` function is not a data frame, so we pass it to the `as.data.frame()` function and then save it in `df.carprice`.
+
+Note how the pipe operator `%>%` is used to pass the output of `read_excel()` function as the input to the `as.data.frame()` function.
+
+As before, we view the top few rows in `df.caprice` using the `head()` function.
+
+```{r}
+df.carprice <- 
+  read_excel("../data/carprice_sample.xlsx") %>% as.data.frame()
+head(df.carprice)
+```
+
+### Slide 12
+
+Next, we inspect the structure of the data.
+
+```{r}
+str(df.carprice)
+```
+
+### Slide 13
+
+To perform Ridge and LASSO regression, the continuous variables in the data need to be *standardised*, by dividing each variable by its standard deviation. After standardisation, all variables have a standard deviation of 1.
+
+-   First we need to compute the standard deviation of each variable. We use the `apply()` function with the `sd()` function to achieve this. Specifying `MARGIN` as 2, indicates that the `sd()` function will be applied across the columns of the data frame. The standard deviations are saved in the `scaler` variable. We will use this at a later stage. 
+
+```{r}
+df.carprice0 <- df.carprice
+scaler <- apply(X = df.carprice0, MARGIN = 2, FUN = sd)
+
+```
+
+-   Next we divide each variable by the standard deviation. Here, we use the `apply()` function again. But this time, we have a user function that takes in vector of values, `x` and divides each of the values in `x` by the standard deviation of `x`. Now the dataset is standardised. 
+
+```{r}
+# Divide each feature/target by its standard deviation
+df.carprice <- as.data.frame(apply(df.carprice0, 2, 
+                                   function(x) x/sd(x) ))
+```
+
+Here, we visualise the distribution of each variable after standardisation. Note, this code is only for illustration. 
+
+```{r}
+df.carprice_long <- df.carprice %>%
+  pivot_longer(everything(), 
+               names_to =  "Variable", 
+               values_to = "n")
+
+ggplot(data = df.carprice_long, 
+       aes(x = Variable, y = n, color = Variable)) +
+    stat_boxplot(geom = "errorbar", width = 0.2) +
+    geom_boxplot()  +
+    labs(title = "Boxplots of the Predictor Variables", 
+         x = "Predictors", y = "Standardized Values" ) +
+    theme(legend.position = "none")
+```
+
+### Slide 14
+
+We will generate the correlation matrix for the predictor variables in `df.carprice` using the `cor()` function as before. Here, we pass the correlation matrix to the `corrplot()` function to visualise the correlation better. 
+
+```{r}
+corrplot(cor(df.carprice), 
+         method = "number", type = "upper", 
+         tl.col = "black", tl.srt = 30)
+```
+
+
+### Slide 16
+
+Here, we generate a scatterplot of `City_MPG` against `Highway_MPG`. Recall, we can plot the simple regression line using the `geom_smooth()` function with the `method` set to `lm`. 
+
+```{r}
+ggplot(data = df.carprice, aes(x = Highway_MPG, y = City_MPG)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Scatter Plot of City MPG vs. Highway MPG",
+       x = "Highway MPG",
+       y = "City MPG")
+```
+
+### Slide 17
+
+Next, we generate scatter plots of the dependendent variable, `Price` against `Highway_MPG` and `City_MPG`.
+
+```{r}
+ggplot(data = df.carprice, aes(x = Highway_MPG, y = Price)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Scatter Plot of Price vs. Highway MPG",
+       x = "Highway MPG",
+       y = "Price")
+```
+
+```{r}
+ggplot(data = df.carprice, aes(x = City_MPG, y = Price)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Scatter Plot of Price vs. City MPG",
+       x = "City MPG",
+       y = "Price")
+```
+
+### Slide 18
+
+Let us fit a MLR model to the data, `df.carprice`. We want the model to include *all* the predictor variables. To do this we can use a `.` in the `formula` as shown below. 
+
+```{r}
+model1 <- lm(Price ~ ., data = df.carprice)
+summary(model1)
+```
+
+### Slide 21
+
+As before, we can use the VIF (Variance Inflation Factor) to check for multicollinearity in the data, using the `vif()` function. 
+
+```{r}
+vif(model1)
+```
+
+### Slide 22
+
+We want to drop `City_MPG` from the MLR model. To do this first we include all variables using the `.` and then use the negative sign `-` in front of the variable name of the variable to be excluded. 
+
+```{r}
+model2 <- lm(Price ~ . - City_MPG, data = df.carprice)
+summary(model2)
+```
+
+### Slide 23
+
+From here on, we will use regularisation. Note that, we will go through all these codes in greater detail in an upcoming video. Here, follow along to generate the results to see the impact of regularisation. 
+
+In the following code, we split the data into the predictor variables, `train.x` and the response variable `train.y`. 
+
+```{r}
+data <- df.carprice
+train.x <- data.matrix(data[, -ncol(data)])
+train.y <- data.matrix(data[, ncol(data)])
+```
+
+Next, we obtain the ridge regression model.
+
+```{r}
+set.seed(123)
+cv_ridge <- cv.glmnet(train.x, train.y, alpha = 0)
+glm_ridge <- glmnet(train.x,
+                    train.y,
+                    alpha = 0,
+                    lambda = cv_ridge$lambda.min)
+t(coef(glm_ridge))
+```
+
+### Slide 24
+
+Next, we obtain the LASSO regression model.
+
+```{r}
+set.seed(123)
+cv_lasso <- cv.glmnet(train.x,train.y, alpha = 1)
+glm_lasso <- glmnet(train.x,train.y, 
+                    alpha = 1, lambda = cv_lasso$lambda.min)
+t(coef(glm_lasso))
+```
+
+### Slide 25
+
+Here, we compare the performances of 3 different models: MLR model `model2`, Ridge regression model `glm_ridge` and LASSO regression model `glm_lasso`. 
+
+```{r}
+# Obtain performance of MLR model
+fit <- model2$fitted.values
+true <- df.carprice$Price
+summary_model2 <- eval_results(true, fit)
+
+# Obtain performance of ridge model
+fit <- predict(glm_ridge, newx = train.x)
+true <- train.y
+summary_ridge <- eval_results(true, fit)
+
+# Obtain performance of LASSO model
+fit <- predict(glm_lasso, newx = train.x)
+true <- train.y
+summary_lasso <- eval_results(true, fit)
+
+# Combine all performances into a single output
+summary <- rbind(summary_model2, summary_ridge, summary_lasso)
+rownames(summary) <- c("MLR_adjusted", "Ridge_model", "LASSO_model" )
+colnames(summary)[5] <- "R^2"
+knitr::kable(summary, digits = 3)
+```
+
+### Slide 27
+
+In the following code, we generate a training set of 32 observations.
+
+```{r}
+set.seed(6674)
+sample <- sample(nrow(df.carprice), 32)
+training <- df.carprice[sample, ]
+test <- df.carprice[-sample, ]
+```
+
+## Slide 28
+
+In the following code, we fit a MLR model to the training set of 32 observations.
+
+```{r}
+model3 <- lm(Price ~.-Highway_MPG, data = training)
+summary(model3)
+```
+
+## Slide 29
+
+In the following code, we evaluate the performance of the MLR model on the training set.
+
+```{r}
+fit <- model3$fitted.values
+true <- training$Price
+summary_MLR3_train <- eval_results(true, fit)
+```
+
+In the following code, we evaluate the performance of the MLR model on the test set.
+
+```{r}
+fit <- predict(model3, newdata=test)
+true <- test$Price
+summary_MLR3_test <- eval_results(true, fit)
+```
+
+In the following code, we summarise the performance of the MLR model on the training set and the test set in a single table.
+
+```{r}
+summary_MLR <- rbind(summary_MLR3_train[-5], 
+                     summary_MLR3_test[-5])
+rownames(summary_MLR) <- c("Baseline MLR_Train", 
+                           "Baseline MLR_Test" )
+knitr::kable(summary_MLR, digits = 3)
+```
+
+## Slide 31-32
+
+In the following code, we obtain the ridge and LASSO regression models for the `training` data, and we evaluate the models both on the `training` and `test` data. 
+
+```{r}
+# Training Data
+data <- training
+train.x <- data.matrix(data[,-ncol(data)])
+train.y <- data.matrix(data[,ncol(data)])
+
+# Test Data
+data <- test
+test.x <- data.matrix(data[,-ncol(data)])
+test.y <- data.matrix(data[,ncol(data)])
+```
+
+In the following code, we fit a ridge regression model and evaluate its performance on the training set and the test set.
+
+```{r}
+# Fit Ridge Regression Model
+set.seed(123)
+cv_ridge <- cv.glmnet(train.x, train.y, alpha = 0)
+glm_ridge <- glmnet(train.x, train.y, 
+                    alpha = 0, lambda = cv_ridge$lambda.min)
+
+# Evaluate Ridge Regression Model on Training Set
+fit <- predict(glm_ridge, newx = train.x, type = "response")
+true <- train.y
+summary_ridge_train <- eval_results(true, fit)
+
+
+# Evaluate Ridge Regression Model on Test Set
+fit <- predict(glm_ridge, newx = test.x, type = "response")
+true <- test.y
+summary_ridge_test <- eval_results(true, fit)
+
+# Summarise Ridge Regression Model Performance into Table
+summary_ridge <- rbind(summary_ridge_train, summary_ridge_test)
+rownames(summary_ridge) <- c("Ridge Model_Train", "Ridge Model_Test" )
+```
+
+In the following code, we fit a LASSO model and evaluate its performance on the training set and the test set.
+
+```{r}
+# Fit LASSO Model
+set.seed(123)
+cv_lasso <- cv.glmnet(train.x,train.y, alpha = 1)
+glm_lasso <- glmnet(train.x,train.y, alpha = 1, 
+                    lambda = cv_lasso$lambda.min)
+
+# Evaluate LASSO Model on Training Set
+fit <- predict(glm_lasso, newx = train.x)
+true <- train.y
+summary_lasso_train <- eval_results(true, fit)
+
+# Evaluate LASSO Model on Test Set
+fit <- predict(glm_lasso, newx = test.x)
+true <- test.y
+summary_lasso_test <- eval_results(true, fit)
+
+# Summarise LASSO Model Performance into Table
+summary_lasso <- rbind(summary_lasso_train, summary_lasso_test)
+rownames(summary_lasso) <- c("LASSO Model_Train", "LASSO Model_Test" )
+```
+
+In the following code, we summarise the MLR Model, Ridge Regression Model and LASSO Model into a single table.
+
+```{r}
+summary_3models <- rbind(summary_MLR3_train, 
+                         summary_ridge_train,                               
+                         summary_lasso_train, 
+                         summary_MLR3_test,                             
+                         summary_ridge_test, 
+                         summary_lasso_test)
+
+rownames(summary_3models) <- c("Baseline MLR_Train", "Ridge Model_Train", 
+                               "LASSO Model_Train",  "Baseline MLR_Test",  
+                               "Ridge Model_Test", "LASSO Model_Test" )
+
+knitr::kable(summary_3models[1:3,-5], digits = 3)
+knitr::kable(summary_3models[4:6,-5], digits = 3)
+```
+
+## Slide 34
+
+In the following code, we summarise the MLR Model and the Ridge Regression Model performance.
+
+```{r}
+knitr::kable(summary_MLR, digits = 3)
+knitr::kable(summary_ridge[,-5], digits = 3)
+```

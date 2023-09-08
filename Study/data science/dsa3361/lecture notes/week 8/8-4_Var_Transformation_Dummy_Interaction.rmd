@@ -1,0 +1,477 @@
+---
+title: "8-4 Variable Transformation, Dummy Variable, and Interaction Effect"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **8-4 Variable Transformation, Dummy Variable and Interaction Effect**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will work with the `phd_salary` data set. Before proceeding, place the data set `phd_salary.csv` in the `data` folder. This R markdown file itself, `8-4_Var_Transformation_Dummy_Interaction.rmd`, should be placed in `src` folder.
+
+## Load packages
+
+We load the packages using the `library()` function. Ensure that the packages are installed before doing this.
+
+```{r include = FALSE}
+library(tidyverse)
+library(gridExtra)
+library(e1071)
+```
+
+## Slide 7
+
+The data is in the CSV (comma separated values) format. We will continue to use the `read.csv()` function to read in the data. The `read.csv()` function returns the dataset in the form of a data frame, and is stored in the variable `df.salary`.
+
+So far, we have only considered continuous variables as predictors. In R, they are stored using the numeric or `num` datatype. In this dataset the first 3 columns are categorical, and the rest of the variables are continuous. In R, categorical variables are stored as *factors*. But this needs to be explicitly specified. Let us see how to do this inside the `read.csv()` function.
+
+-   First, take a peek into the dataset file `phd_salary.csv` and you can see the first 3 columns are `rank`, `discipline` and `sex` and all of them are categorical. The rest of the variables, `yrs.since.phd` and `salary` are continuous.
+
+-   Create a list of data types for each column we are expecting to read in: 3 factors and 2 numeric. First, we use the replicate function, `rep()` to create a list of 3 factors and 2 numeric data types. We now combine these 2 lists into 1 list, using the combine function, `c()`.
+
+-   The list of datatypes is assigned to the `colClasses` parameter in the `read.csv()` function.
+
+As before, we view the top few rows in `df.advert` using the `head()` function.
+
+```{r message=FALSE}
+df.salary <- read.csv("../data/phd_salary.csv",
+                      colClasses = c(rep(x = 'factor', times = 3),
+                                     rep(x = 'numeric', times = 2)))
+head(df.salary)
+```
+
+## Slide 8
+
+The `str()` function is used to display the structure of the data frame. The first line shows the number of rows or observations and the number of columns or variables. Each variable is then shown following the `$` sign - first the data type is shown and then the first few observations.
+
+```{r}
+str(df.salary)
+```
+
+## Slide 9
+
+Check for missing data and duplicates. Note the number of rows.
+
+```{r}
+sum(is.na(df.salary))
+sum(duplicated(df.salary))
+nrow(df.salary)
+```
+
+## Slide 10
+
+We will now check the distribution of each continuous variable in the dataset. As before, we can plot a histogram to visualise distribution of `yrs.since.phd`, and compute the skewness of the distribution using `skewness()` function.
+
+```{r}
+p.hist.yrs <-
+  ggplot(data = df.salary,
+         mapping = aes(x = yrs.since.phd)) +
+  geom_histogram() +
+  labs(y = "Number of Professors",
+       title = "Distribution of Years of Service since PhD")
+p.hist.yrs
+
+skewness(df.salary$yrs.since.phd)
+```
+
+Next, let us check the distribution of `salary`. Lets add a few more details to the histogram:
+
+-   Say, we would like to get the frequency, i.e. number of processors for a salary range of 10,000. To do this, we set the parameter `bin_width` in the `geom_histogram` function to 10,000.
+
+-   We want to the x-labels to show ticks at 50,000, with the maximum value at 350,000. The `scale_x_continuous()` function is used to specify this. The `seq()` function generates the x-axis labels from 0 to 350,000 at 50,000 steps. This is assigned to the `breaks` parameter.
+
+```{r, warning=FALSE}
+p.hist.salary <-
+  ggplot(data = df.salary,
+         mapping = aes(x = salary)) +
+  geom_histogram(binwidth = 10000) +
+  scale_x_continuous(breaks = seq(from = 0, to = 350000, by = 50000)) +
+  labs(y = "Number of Professors",
+       title = "Distribution of 9-month Salary")
+p.hist.salary
+
+skewness(df.salary$salary)
+```
+
+## Slide 11
+
+Now it is time to consider the relationship between the response variable, `salary` and the predictor variables. Let us start with the categorical predictor variable, `rank`. Note that there is an inherent sequence in the categories here based on seniority levels, with "AsstProf" lower than "AssocProf", lower than "Prof". We can explicitly set up this order in R, using the `factor()` function. The ordered list is passed to the `levels` parameter.
+
+```{r}
+df.salary$rank <-
+  factor(df.salary$rank, levels = c("AsstProf", "AssocProf", "Prof"))
+```
+
+We can show a box plot of `salary` vs `rank`. These are the steps:
+
+1.  As before, we use the `ggplot()` function for this plot. The dataset in `df.salary` is passed to the input parameter `data`.
+
+2.  The whiskers of the boxplot are plotted using the `stat_boxplot()` function.
+
+3.  Add the `geom` layer to the plot. Since this is a boxplot, we will add the `geom_boxplot()` function.
+
+4.  Add the cross to show the mean on the boxplot using the `stat_summary()` function. Since we want to display the mean, the `fun` parameter is set to "mean".
+
+5.  The y-axis labels are formatted using the `scale_y_continuous()` function, similar to the earlier histogram.
+
+6.  Update the axis labels for the x axis using the `labs()` function.
+
+```{r}
+p.box.salary.rank <-
+  ggplot(data = df.salary,
+         mapping = aes(x = rank, y = salary)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  stat_summary(
+    fun = "mean",
+    geom = "point",
+    shape = 4,
+    size = 3
+  ) +
+  scale_y_continuous(breaks = seq(from = 0, to = 350000, by = 50000)) +
+  labs(title = "9-month Salary vs Rank")
+
+p.box.salary.rank
+```
+
+## Slide 12
+
+The boxplot for `salary` vs `discipline` uses the same code as above, except that the `x` parameter in the `aes()` function inside the `ggplot` function refers to `discipline` instead of `rank`.
+
+```{r, warning=FALSE}
+p.box.salary.disc <-
+  ggplot(data = df.salary,
+         mapping = aes(x = discipline, y = salary)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  stat_summary(
+    fun = "mean",
+    geom = "point",
+    shape = 4,
+    size = 3
+  ) +
+  scale_y_continuous(breaks = seq(from = 0, to = 350000, by = 50000)) +
+  labs(title = "9-month Salary vs Discipline")
+
+p.box.salary.disc
+```
+
+## Slide 13
+
+The boxplot for `salary` vs `sex` uses the same code as above, except that the `x` parameter in the `aes()` function inside the `ggplot` function refers to `sex` instead of `rank`.
+
+```{r, warning=FALSE}
+p.box.salary.sex <-
+  ggplot(data = df.salary,
+         mapping = aes(x = sex, y = salary)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  scale_y_continuous(breaks = seq(from = 0, to = 350000, by = 50000)) +
+  stat_summary(
+    fun = "mean",
+    geom = "point",
+    shape = 4,
+    size = 3
+  ) +
+  labs(title = "9-month Salary vs Sex")
+
+p.box.salary.sex
+```
+
+## Slide 14
+
+Now we plot the scatter plot for `salary` vs `yrs.since.phd` to check if the relationship is linear.
+
+```{r, warning=FALSE}
+p.scatter <-
+  ggplot(data = df.salary,
+         mapping = aes(y = salary, x = yrs.since.phd)) +
+  geom_point() +
+  labs(title = "9-month Salary vs Years Since PhD") +
+  scale_y_continuous(breaks = seq(from = 0, to = 350000, by = 50000))
+
+p.scatter
+```
+
+## Slide 16-17
+
+We want to draw the best fit line to the scatter plot for `salary` vs `yrs.since.phd` but we do not need to redo the code for generating the scatter plot as we already saved it in `p.scatter`. So we simply add the `geom_smooth()` function as a new layer to the plot as shown below, and save it again to `p.scatter`.
+
+```{r, warning=FALSE}
+p.scatter <- p.scatter +
+  geom_smooth(method = lm, se = FALSE)
+
+p.scatter
+```
+
+## Slide 19-20
+
+To check if log transformations will help better represent the relationship between `salary` and `yrs.since.phd`, we generate the corresponding scatter plot. To transform the x-axis, we use `log(yrs.since.phd)` instead of `yrs.since.phd`, and similarly, to transform the y-axis we use `log(salary)` instead of `salary` in the `aes()` function.
+
+```{r}
+p.scatter1 <-
+  ggplot(data = df.salary,
+         mapping = aes(y = salary, x = yrs.since.phd)) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(from = 0, to = 350000, by = 50000)) +
+  labs(title = "9-month Salary vs Years Since PhD")
+
+
+p.scatter2 <-
+  ggplot(data = df.salary,
+         mapping = aes(y = salary, x = log(yrs.since.phd))) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(from = 0, to = 350000, by = 50000)) +
+  scale_x_continuous(breaks = seq(from = 0, to = 3.5, by = 0.5)) +
+  labs(title = "9-month Salary vs Log Years Since PhD")
+
+p.scatter3 <-
+  ggplot(data = df.salary,
+         mapping = aes(y = log(salary), x = yrs.since.phd)) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(from = 0, to = 13, by = 0.5)) +
+  labs(title = "Log 9-month Salary vs Years Since PhD")
+
+p.scatter4 <-
+  ggplot(data = df.salary,
+         mapping = aes(y = log(salary), x = log(yrs.since.phd))) +
+  geom_point() +
+  scale_y_continuous(breaks = seq(from = 0, to = 13, by = 0.5)) +
+  scale_x_continuous(breaks = seq(from = 0, to = 3.5, by = 0.5)) +
+  labs(title = "Log 9-month Salary vs Log Years Since PhD")
+```
+
+To compare the plots with each other, we can display them side by side with the `grid.arrange()` function in `gridExtra` package.
+
+```{r}
+grid.arrange(p.scatter1, p.scatter2, p.scatter3, p.scatter4, nrow = 2)
+```
+
+## Slide 21
+
+Let us now see how the distribution of `salary` across `rank` changes when we use `log(salary)` instead. Earlier, we used a box plot to show the distribution. Here, we use histograms. To show the histogram of `salary` for each value of `rank`, we use the `facet_grid()` function and pass in `rank` as the input parameter. 
+
+```{r}
+p.hist.salary <-
+  ggplot(df.salary,
+         aes(x=salary)) +
+  geom_histogram(binwidth=10000) +
+  scale_x_continuous(breaks = seq(from=0, to=350000, by=50000)) +
+  labs(x="9-month Salary",
+       y = "Number of Professors",
+       title ="Histogram of 9-month Salary") +
+  facet_grid(rank ~ .) 
+
+p.hist.logsalary <-
+  ggplot(df.salary,
+         aes(x=log(salary))) +
+  geom_histogram(binwidth=0.2) +
+  scale_x_continuous(breaks = seq(from=0, to=15, by=0.5),
+                     limits = c(10,15)) +
+  labs(x="Log of 9-month Salary",
+       y = "Number of Professors",
+       title ="Histogram of Log 9-month Salary") +
+  facet_grid(rank ~ .) 
+
+grid.arrange(p.hist.salary, p.hist.logsalary, nrow=1)
+```
+
+## Slide 22
+
+Now compare the simple linear regression models with `salary` and `log(salary)` as response variable. In the `lm()` function, the `log` transformation can be directly applied to the `formula`. We have skipped the use of `formula = ` and `data = ` in the `lm()` function here.  
+
+```{r, warning=FALSE}
+lm.bef.log <- lm(salary ~ yrs.since.phd, df.salary)
+summary(lm.bef.log)
+
+lm.aft.log <- lm(log(salary) ~ yrs.since.phd, df.salary)
+summary(lm.aft.log)
+```
+
+## Slide 24
+
+```{r}
+summary(lm.aft.log)
+```
+
+## Slide 28-30
+
+We will now randomly split the data into train and test datasets, using the same code as before, but with the dataset `df.salary`.
+
+```{r}
+set.seed(10)
+index <- sort(sample(nrow(df.salary), nrow(df.salary) * .8))
+train <- df.salary[index, ]
+test <- df.salary[-index, ]
+```
+
+Let us train a linear regression model with `log(salary)` as response, and `sex` and `yrs.since.phd` as predictors.
+
+```{r}
+lm1 <- lm(log(salary) ~ sex + yrs.since.phd, train)
+summary(lm1)
+```
+
+## Slide 33
+
+Here, we want to visualise the linear regression model `lm1`. Note that we have two predictors, `yrs.since.phd` and `sex`. In our model, the `sex` is represented using a dummy variable `sexM` which is 0 when `sex="F"` and 1 when `sex="M"`. This leads to 2 regression lines that have "parallel slopes" and with each value of the dummy variable giving a different intercept.
+
+First, lets extract the coefficients of the model using `coef()` function and save it in `betas`.
+
+```{r}
+betas <- coef(lm1)
+betas
+```
+
+We now compute the intercept when the dummy variable `sexM` which is 0 when `sex="F"` and save it in `intercept_F` and when the dummy variable `sexM` which is 1 when `sex="M"` in `intercept_M`.
+
+```{r}
+intercept_F <- betas[1]
+intercept_M <- betas[1] + betas[2]
+
+intercept_F
+intercept_M
+```
+
+Let us save the parameters of the 2 regression lines - the factors for `sex`, intercepts and slopes - in a data frame `lm1.coef.sex` to help visualise them later.
+
+```{r}
+lm1.coef.sex <- data.frame(
+  sex = levels(df.salary$sex),
+  intercept = c(intercept_F, intercept_M),
+  slope = c(betas[3], betas[3])
+)
+```
+
+We are ready to draw the scatter plot now with these steps:
+
+1.  We use the `ggplot()` function for this plot. The dataset in `df.advert` is passed to the input parameter `data`.
+
+2. Add the `geom` layer to the plot. Since this is a scatter plot, we will add the `geom_point()` function.
+
+3. Update the axis labels for the x axis using the `labs()` function.
+
+```{r}
+ggplot(data = train,
+       mapping = aes(
+         x = yrs.since.phd,
+         y = log(salary),
+         color = sex
+       )) +
+  geom_point() +
+  geom_abline(data = lm1.coef.sex,
+              aes(
+                intercept = intercept,
+                slope = slope,
+                color = sex
+              ))+
+  labs(title="Log(salary) vs Years since PhD based on Sex")
+```
+
+## Slide 34
+
+Let us train a linear regression model with `log(salary)` as response, and all the predictors, `rank`, `discipline`, `sex` and `yrs.since.phd` as predictors.
+
+```{r}
+lm2 <-
+  lm(log(salary) ~ rank + discipline + sex + yrs.since.phd,
+     train)
+summary(lm2)
+```
+
+## Slide 35-37
+
+```{r}
+summary(lm2)
+```
+
+## Slide 43-44
+
+To include an interaction term for `discipline` and `yrs.since.phd`, update the `formula` with the term `discipline * yrs.since.phd`.
+
+```{r}
+lm3 <-
+  lm(log(salary) ~ rank + sex + discipline * yrs.since.phd,
+     train)
+summary(lm3)
+```
+
+## Slide 45-46
+
+```{r}
+summary(lm2) # Without interaction term 
+summary(lm3) # With interaction term 
+```
+
+## Slide 46
+```{r}
+summary(lm3) # With interaction term 
+```
+
+## Slide 48
+
+To check that the residuals are normally distributed, we can plot the histogram of residuals, as before. To compute residuals, we will use the `resid()` function.
+
+```{r}
+ggplot(mapping = aes(x = resid(lm3))) +
+  geom_histogram(binwidth = 0.08) +
+  labs(x = "Residuals",
+       y = "Frequency",
+       title = "Histogram of Residuals")
+```
+
+## Slide 49
+
+We are now ready to generate the diagnostic plot of residuals vs. fitted values. We will use the `plot()` function and specify the `which` parameter as 1, as before.
+
+```{r}
+plot(lm3, which=1)
+```
+
+## Slide 50
+
+We reuse the user defined function, `eval.metrics.linreg()` to compute the evaluations metrics for the multiple linear regression model, `lm3`, for the `train` and `test` data respectively. Note that, we are now predicting `log(salary)` and therefore, the `actual` variable uses `log(salary)`.
+
+
+```{r}
+eval.metrics.linreg <- function(actual, predicted) {
+  residual <- actual - predicted
+  mse <- mean(residual ^ 2)
+  mae <- mean(abs(residual))
+  rmse <-  sqrt(mse)
+  mape <- mean(abs(residual / actual)) * 100
+  
+  data.frame(
+    MSE = mse,
+    MAE = mae,
+    RMSE = rmse,
+    MAPE = mape
+  )
+}
+
+# Evaluation metrics for train data
+actual <- log(train$salary)
+predicted <- predict(lm3, newdata = train)
+eval.metrics.linreg(actual, predicted)
+
+# Evaluation metrics for test data
+actual <- log(test$salary)
+predicted <- predict(lm3, newdata = test)
+eval.metrics.linreg(actual, predicted)
+```
+
+## Slide 54
+
+Let us use the model, `lm3` to make a prediction for an individual faculty member, who is a female assistant professor from discipline A and it has been 5 years since she completed her  PhD. Remember, the prediction is the `log` of her expected salary, and so we use the `exp()` or exponent function to transform it back. 
+
+```{r}
+newdata <-
+  data.frame(
+    rank = "AsstProf",
+    discipline = "A",
+    sex = "F",
+    yrs.since.phd = 5
+  )
+
+log.salary <- predict(lm3, newdata = newdata, interval = "prediction")
+exp(log.salary)
+
+```

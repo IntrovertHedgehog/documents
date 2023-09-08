@@ -1,0 +1,412 @@
+---
+title: "12-3_4 Ridge Regression"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **12-3 Ridge Regression Part 1** and **12-4 Ridge Regression Part 2**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will work with the `boston_housing_price` data set. Before proceeding, place the data set `boston_housing_price.csv` in the `data` folder. This R markdown file itself, `12-3_4_Ridge_Regression.rmd`, should be placed in `src` folder.
+
+### Load Libraries
+
+In the following code, we load the required libraries: `car` is required for `vif()`. `corrplot` is required for `corrplot()`. And `plotmo` is required for `plot_glmnet()`.
+
+```{r}
+library(DescTools)
+library(car)
+library(corrplot)
+library(glmnet)
+library(plotmo)
+```
+
+### Slides 18-19
+
+We load the data into `df.housing` and return the first few rows.
+
+```{r}
+df.housing <- read.csv("../data/boston_housing_price.csv")
+head(df.housing)
+```
+
+### Slide 20
+
+We inspect the structure of the data using the `str()` function.
+
+```{r}
+str(df.housing)
+```
+
+### Slide 21
+
+Next, we inspect the data for missing and duplicate values.
+
+```{r}
+sum(is.na(df.housing))
+sum(duplicated(df.housing))
+```
+
+### Slide 22
+
+Next, we compute the standard deviations of each variable and save this in `scaler` for use later.
+
+```{r}
+scaler <- apply(df.housing, 2, sd)
+scaler
+```
+
+Let us now standardise the variables in the `df.housing` data. Note that we keep the original unstandardised dataset in `df.housing0`.
+
+```{r}
+df.housing0 <- df.housing
+df.housing <- as.data.frame(apply(df.housing0, 2, 
+                                  function (x) x/sd(x)))
+```
+
+### Slide 23
+
+We check that the data have been standardised properly by computing the standard deviations.
+
+```{r}
+apply(df.housing, 2, sd)
+```
+
+We obtain the unstandardised value for a specific observation from its standardised value and standard deviation. Note that the `scaler` variable has the standard deviations for each variable in the data.
+
+```{r}
+df.housing[1, 6] * scaler[6]
+df.housing0[1, 6]
+```
+
+### Slide 24
+
+We can generate the five number summary of each variable in the data using the `summary()` function. This is an alternative to plotting the histogram or box plot to check the distribution of each of the variables.
+
+```{r}
+summary(df.housing)
+```
+
+### Slide 25
+
+Using the `plot()` function we can generate a quick visualisation of scatter plots between each pair of predictor variables. The `col` and `cex` parameters are used to customise the plot. Get more details for these parameters in the help page for `plot()` using `?plot` on the console.
+
+```{r}
+plot(df.housing, col = "darkblue", cex = 1.2)
+```
+
+### Slide 26
+
+Next, let us generate the correlation matrix for the predictor variables in `df.housing` using the `cor()` function as before. As before, we pass the correlation matrix to the `corrplot()` function to visualise the correlation better.
+
+```{r}
+corrplot(cor(df.housing),
+  method = "number", type = "upper",
+  tl.col = "black", tl.srt = 45)
+```
+
+### Slide 27
+
+In the following code, we check the VIF for the full MLR model with all predictors included.
+
+```{r}
+lm_model0 <- lm(formula = Price ~ ., data = df.housing)
+vif(lm_model0)
+```
+
+### Slide 28
+
+In the following code, we return the model summary for the full MLR model.
+
+```{r}
+summary(lm_model0)
+```
+
+### Slide 29: Prepare the Data for glmnet()
+
+In the following code, we split the data into a training set (20%) and a test set (80%). Please know that the training set here, comprises 20% of the full data for illustration purposes only. In practice, this is almost never practised; the training set will comprise a much larger proportion of the full data.
+
+```{r}
+set.seed(4991)
+rate <- 0.2
+train.size <- round(nrow(df.housing) * rate)
+sample <- sample(nrow(df.housing), train.size)
+training <- df.housing[sample, ]
+test <- df.housing[-sample, ]
+
+```
+
+We will use the `glmnet()` function from the `glmnet` package, for Ridge regression. The `glmnet()` requires the data to prepared in a certain format.
+
+-   The `glmnet()` needs the data to be in the form of a data matrix, not a data frame. The `model.matrix()` function is used to convert the data into a matrix format. The `model.matrix()` function takes 2 parameters here:
+
+    -   The formula that specifies the response and predictor variables. Here, the response is `Price` and we use all the predictors, and specify this with a `.` - this formula has the same format as the one we specify in the `lm()` function.
+
+    -   The data
+
+-   The `glmnet()` needs the train/test data to be split into the predictors and the response variable.
+
+    -   The `model.matrix()` function generates the matrix with the predictors, but we need to remove the first column, `intercept`. This is saved in `train.x`.
+
+    -   The response variable, `Price` is extracted directly from the original data frames, `training` and `test`.
+
+```{r}
+train.x <- model.matrix(Price ~ ., data = training)[, -1]
+train.y <- training$Price
+test.x  <- model.matrix(Price ~ ., data = test)[, -1]
+test.y  <- test$Price
+```
+
+### Slide 30
+
+Next we train a ridge regression model with the regularisation parameter, $\lambda=0.1$. Note that for ridge regression the `alpha` parameter is set to 0. The coefficients of the ridge model, `model_ridge_trial1` can be shown using the `coef()` function. We transpose the matrix of coefficients with the `t()` function to see them in a single line.
+
+```{r}
+model_ridge_trial1 <- glmnet(train.x,train.y, alpha = 0, lambda = 0.1)
+t(coef(model_ridge_trial1))
+```
+
+### Slide 31
+
+Let us try to use the `summary()` function to return a summary of the ridge regression model trained with $\lambda=0.1$.
+
+```{r}
+summary(model_ridge_trial1)
+```
+
+### Slide 32
+
+In the following code, we train a ridge regression model with $\lambda=0.5$.
+
+```{r}
+model_ridge_trial2 <- glmnet(train.x,train.y, alpha = 0, lambda = 0.5)
+t(coef(model_ridge_trial2))
+```
+
+In the following code, we train a ridge regression model with $\lambda=1$.
+
+```{r}
+model_ridge_trial3 <- glmnet(train.x,train.y, alpha = 0, lambda = 1)
+t(coef(model_ridge_trial3))
+```
+
+### Slide 33
+
+In the following code, we return the coefficients of the three ridge regression models trained above.
+
+```{r}
+table_summary <- cbind(coef(model_ridge_trial1), 
+                       coef(model_ridge_trial2), 
+                       coef(model_ridge_trial3))
+
+colnames(table_summary) <- c("lambda = 0.1", 
+                             "lambda = 0.5", 
+                             "lambda = 1")
+table_summary
+```
+
+### Slides 34-39
+
+Note that so far we used a single value of $\lambda$. Let us now train 100 ridge regression models with the sequence of lambda values, $\lambda=10^{-6}$ to $\lambda=10^{2}$.
+
+-   First we generate the sequence of 100 $\lambda$ values using the `seq()` function.
+
+-   We call the `glmnet()` function by passing it this sequence of $\lambda$ stored in `lambda`.
+
+```{r}
+lambda <- 10 ^ seq(-6, 2, length = 100)
+ridge_model <- glmnet(train.x, train.y, alpha = 0, lambda = lambda)
+```
+
+`glmnet()` returns a list of 100 ridge regression models this time, and this is saved in `ridge_model` above. You can see the coefficients for all these models using the same code as before.
+
+```{r}
+t(coef(ridge_model))
+```
+
+Let us now visualise how the coefficients change with the $\lambda$ values. We will generate a plot for the coefficients of each of the predictors in the ridge model vs. the corresponding $log(\lambda)$. We can generate the basic plot with the `plot()` function.
+
+```{r}
+plot(ridge_model, xvar = "lambda", label = TRUE)
+```
+
+Let us customise the plot with some labels.
+
+```{r}
+add_lbs <- function(fit, offset_x=2.5) {
+  L <- length(fit$lambda)
+  x <- log(fit$lambda[L])+ offset_x
+  y <- fit$beta[, L] 
+  labs <- names(y)
+  text(x, y, labels=labs, cex = 1.5)
+}
+
+title(main = "Coefficients of Predictors vs. Log(Lambda)", 
+      cex.main = 1.4,  adj = 0, line = 3)
+title(sub = "Number of Predictors", cex.sub = 1.1, adj = 0.55, line = -21.5)
+add_lbs(ridge_model)
+legend("topright", lwd = 1, col = 1:6, legend = colnames(train.x), cex = .7)
+```
+
+### Slide 40
+
+In the following code, we use a simpler method to generate the plot for the coefficients vs. $log(\lambda)$ using the `plot_glmnet()` function.
+
+```{r}
+plot_glmnet(ridge_model)
+```
+
+### Slide 42
+
+So far, we showed how the `glmnet()` function achieves ridge regression when we specify a sequence of $\lambda$ values. We have not seen how to select the final ridge regression model, among the 100 models.
+
+We perform 10-fold cross-validation with the cross validation mean squared error (MSE) as the metric to select the best ridge regression model. To do this, we use the `cv.glmnet()` function here, instead of `glmnet()` function.
+
+-   Note that in `cv.glmnet()` we do not need to specify the $\lambda$ value explicitly.
+
+-   We need to specify the metric we want to use to select the best ridge regression model, with the `type.measure` parameter. Here, we set it to "mse".
+
+```{r}
+set.seed(123)
+cv_ridge <- cv.glmnet(train.x, train.y, alpha = 0, type.measure = "mse")
+```
+
+### Slide 43
+
+In the following code, we obtain two options for the best $\lambda$ value:
+
+1.  `lambda.min` - $\lambda$ at which the cross validation MSE is minimum.
+
+2.  `lambda.1se` - $\lambda$ at which the cross validation MSE is within 1 standard error of the minimum MSE.
+
+```{r}
+cv_ridge
+cv_ridge$lambda.min
+cv_ridge$lambda.1se
+```
+
+### Slides 44-46
+
+Next we plot the cross validation MSE against $log(\lambda)$ for the range of models returned by `cv.glmnet()` function in `cv_ridge`. We use `plot()` function.
+
+```{r}
+plot(cv_ridge)
+```
+
+We can add some labels to the plot to highlight `lambda_min` and `lambda_1se`.
+
+```{r}
+# Label for lambda.min
+abline(v=log(cv_ridge$lambda.min), col = "red", lty=5)
+text(log(cv_ridge$lambda.min)+1, 1.4, 
+     labels= paste0("lambda_min = ", 
+                    round(cv_ridge$lambda.min, digits = 3)), 
+     cex = 1.1)
+
+# Label for lambda.1se
+abline(v=log(cv_ridge$lambda.1se), 
+       col = "red", lty=5)
+text(log(cv_ridge$lambda.1se)+1, 1.25, 
+     labels= paste0("lambda_1se = ", 
+                    round(cv_ridge$lambda.1se, digits = 3)), cex = 1.1)
+```
+
+### Slide 47
+
+In the following code, we train the ridge regression model using `lambda.min`.
+
+```{r}
+glm_Ridge <- glmnet(train.x, train.y, alpha = 0, lambda = cv_ridge$lambda.min)
+t(coef(glm_Ridge))
+```
+
+### Slide 48
+
+In the following code, we define a function `eval_results (fit, true)` to return the evaluation metrics for a given model. `fit` is the predicted value and `true` is the actual value.
+
+```{r}
+eval_results <- function(fit, true) {
+  actual <- data.matrix(true)
+  SSE <- sum((actual - fit)^2)
+  SST <- sum((actual - mean(actual))^2)
+  R_square <- 1 - SSE / SST
+  data.frame(
+    MSE = MSE(fit, true),
+    MAE = MAE(fit, true),
+    RMSE = RMSE(fit, true),
+    MAPE = MAPE(fit, true),
+    R2 = R_square
+  )
+}
+```
+
+We now evaluate the performance of the ridge regression model `glm_Ridge` on the training data. The `predict()` function is used as before to apply the model on the entire train data, `train.x`.
+
+```{r}
+fit <- predict(glm_Ridge, train.x)
+true <- train.y
+summary_Ridge_train <- eval_results(fit, true)
+summary_Ridge_train
+```
+
+Similarly, we return the performance of the ridge regression model on the test data.
+
+```{r}
+fit <- predict(glm_Ridge, test.x)
+true <- test.y
+summary_Ridge_test <- eval_results(fit, true)
+summary_Ridge_test
+```
+
+### Slide 49
+
+In the following code, we summarise the ridge regression model performance on both the training data and the test data.
+
+```{r}
+summary_Ridge <- rbind(summary_Ridge_train[-5], summary_Ridge_test[-5])
+rownames(summary_Ridge) <- c("Ridge_train", "Ridge_test")
+knitr::kable(summary_Ridge, digits = 3)
+```
+
+### Slide 50
+
+Next, we check the residuals for the ridge regression model.
+
+```{r}
+# Obtain fitted and true values
+fit <- predict(glm_Ridge, train.x)
+true <- train.y
+
+# Plot residuals
+plot(fit, true - fit, 
+     main = "Residual Plot of Ridge Regression Model on the Training dataset", 
+     xlab = "Fitted Value", 
+     ylab = "Standardised Residuals")
+abline(h = 0, col = "red", lwd = 2)
+abline(h = 1, col = "red", lty = 2, lwd = 2)
+abline(h = -1, col = "red", lty = 2, lwd = 2)
+```
+
+### Slides 52
+
+We standardise a new data point in `new_data`, by dividing it by the standard deviations that we stored in `scaler` earlier. Now we are ready to plug it into the fitted ridge regression model.
+
+```{r}
+new_data <- data.frame(
+  Crime_rate = 0.00632,
+  Industry = 2.31,
+  Number_of_rooms = 6.575,
+  Access_to_highways = 1,
+  Tax_rate = 296
+)
+new_data
+
+new_x <- data.matrix(new_data / scaler)
+new_x
+```
+
+### Slide 53
+
+In the following code, we make a prediction for a new data point. Remember to multiply the standard deviation to this predicted value before interpreting the result.
+
+```{r}
+predict(glm_Ridge, new_x) * scaler[6]
+```

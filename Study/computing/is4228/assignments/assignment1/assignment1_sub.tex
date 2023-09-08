@@ -1,0 +1,77 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Assignment 1 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{enumerate}
+  \item \begin{enumerate}
+    \item The present value of the investment inflow cash is:
+      \[
+        PV_{inflow} = \frac{1,500}{1+r} + \frac{1,000}{(1+r)^2} + \frac{10,000}{(1+r)^{10}} = 10,635.24
+      \]
+      Then
+      \[
+        NPV = PV_{inflow} - PV_{outflow} = 10,635.24 - 10,000 = 635.24
+      \]
+      We should take this opportunity.
+    \item 
+      \[
+        EAR = \left(1 + \frac{APR}{2}\right)^2 - 1 = 6.09\%
+      \]
+      Then 
+      \begin{align*}
+        PV_{inflow} &= 7,839.13 \\
+        NPV &= -2,160.86
+      \end{align*}
+      We should not take it.
+  \end{enumerate}
+  % question 2
+  \item Let $C$ be amount to be paid each year:
+    \[
+      300,000 = \frac{C}{r} \left(1- \frac{1}{(1+r)^{30}}\right)
+    \]
+    Then 
+    \[
+      C = \begin{cases}
+        19,515.43, &\text{ if } r = 5\% \\
+        24,175.92, &\text{ if } r = 7\% \\
+      \end{cases}
+    \]
+  % question 3
+  \item After 29 years, I have repaid $\frac{22,500}{r} \left(1 - \frac{1}{(1+r)^{29}}\right)=\$276,247.66$ in present value. I have $\$23,752.34$ left in debt (PV). This translate to:
+    \[
+    C_{30} = 23,752.34 \times 1.07^{30} = \$180,808.86
+    \]
+  % question 4
+  \item 
+  \begin{align*}
+    PV_{inflow} =  20 \\
+    PV_{outflow} = \frac{2}{r}
+  \end{align*}
+  Calculate IRR:
+  \[
+    IRR = \frac{2}{20} = 10\%
+  \]
+  The IRR says to only accept this deal if $r > 10\%$ \\
+  Calculate NPV:
+  \[
+    NPV = 20 - \frac{2}{0.08} = -5
+  \]
+  I should not take the deal. \\
+  If the rules deviate, I should follow NPV because of its more relaxed assumptions.
+  % question 5
+  \item 
+    \begin{align*}
+      r &= \sqrt[4]{1 + EAR} - 1 = 0.012 \\
+      PV_{payments} &= 200 \times \left(1 + \frac{1}{1+r} + \dots + \frac{1}{(1+r)^4} \right) \\
+      &= 976.05
+    \end{align*}
+    My minimal evaluatino for the console is $\$976.05$ in present value to consider buying it.
+\end{enumerate}
+\end{document}

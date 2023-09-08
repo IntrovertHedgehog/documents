@@ -1,0 +1,43 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Problem Set 1 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+
+\begin{document}
+\maketitle
+\section{Submission}
+\begin{enumerate}[leftmargin=\labelsep]
+  \item Supposed there's a stable matching where man $m$ and $w$ are not matched to each other, WLOG with two pairs $(m, w')$ and $(m', w)$. Since $m$ ranks $w$ higher than $w'$, and $w$ ranks $m$ higher than $m'$. This matching is not stable.
+    $\Rightarrow$ $m$ and $w$ must be matched in any stable matching if there's one.
+  \item Xinyu can report her preferences in descending affection as Bao-Charlie-Ashish and manipulate the algorithm to be in the women's favour. With this report:
+    \begin{itemize}
+      \item If (Ashish, Xinyu) is matched, either Bao or Charlie is matched with Zuzu, whom they prefer less than Xinyu. Xinyu prefers either Bao or Charlie to Ashish (as in her report), so (Ashish, Xinyu) is unstable.
+      \item If (Charlie, Xinyu) is matched, and:
+        \begin{itemize}
+          \item (Bao, Zuzu) is matched, the matching is unstable because Xinyu prefers Bao to Charlie, and Bao prefers Xinyu to Zuzu.
+          \item (Bao, Yashoda) and (Ashish, Zuzu) are matched, the matching is unstable because Ashish prefers Yashoda to Zuzu, and Yashoda prefers Ashish to Bao.
+        \end{itemize}
+      $\Rightarrow$ (Bao, Xinyu) must be in every stable matching if there's one.
+    \end{itemize}
+    Since {(Ashish, Zuzu), (Charlie, Yashoda)} is unstable because Ashish and Yashoda prefer eachother than their current partners.
+    $\Rightarrow$ The only stable matching is the women-optimal one: (Ashish, Yashoda), (Bao, Xinyu), (Charlie, Zuzu)
+  \item While softwares designed to server social good can benefit society as a whole, algorithmic decisions might lead to favourism of some groups over others. This disparity can happen even without creators' intention, causing unfair treatments, disatisfaction, and other harmful consequences. In the case of COMPAS, eventhough the model appears to be equally accurate between groups, it seemingly didn't take into account the difference between false positive rate and false negative rate (evident from the statistical tests), resulting in (possibly) unforeseen favourism. The lack of transparency and rigorous sientific testing when using these softwares is alarming, as it put defendants at unfair disadvantages. Judges might only use these softwares as reference along with other decisive factors, but it can still ingrain subconscious bias, which arguably has led to numerous questionable decisions.
+\end{enumerate}
+
+\section{Additional Problems}
+\begin{enumerate}[leftmargin=\labelsep]
+  \item Student-optimized: Students going down their list of preferred classes and get assigned if: (1) class still got vacancy, or (2) class prefers them more than on of its assigned student $rightarrow$ kick that student out and take the new student in.
+    Class-optimized: While class stills got vacancies, going down its list of students and gobble down all the student if: (1) they are not taken, or (2) attending a less preferred class. Each class keeps doing so until it runs of vancancies.
+  \item Doing the usual algorithm, but extends the assignment condition to take into account of forbidden classes.
+    \textit{Extension:} There're 2 courses need to be assigned tutorial classes, must keep them from schedule conflicts.
+  \item The matching problem is designed as:
+    \begin{itemize}
+      \item Ship' preferences: The order of the ports it is visiting, chronologically
+      \item Port' preferences: The order of the ships it is being visited by, anti-chronologically
+    \end{itemize}
+    \textbf{Rationale: } A paring of (s, p) between a ship and its final port is ustable if there's another paring (s', p') such that s arrives that p' before p, and p' serves s' after s.
+\end{enumerate}
+\end{document}

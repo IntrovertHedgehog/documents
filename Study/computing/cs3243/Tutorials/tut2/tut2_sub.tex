@@ -1,0 +1,45 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{makecell}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\renewcommand\theadfont{\bfseries}
+\title{Problem Set 2 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+
+\begin{document}
+\maketitle
+\section*{Question 5}
+\begin{enumerate}[label={(\alph*)}]
+  \item\ \\
+    \begin{center}
+      \begin{tabular}{|l|l|l|}
+        \hline
+        \thead{Heuristic} & \thead{Admissible} & \thead{Consistent} \\
+        \hline
+        $h_1$ & Yes & Yes \\
+        \hline
+        $h_2$ & Yes & No \\
+        \hline
+        $h_3$ & Yes & Yes \\
+        \hline
+        $h_4$ & Yes & No \\
+        \hline
+        $h_5$ & No  & No \\
+        \hline
+      \end{tabular}
+    \end{center}
+  \item $S-A-B-G$
+  \item I would use $h_3$ since it's consistent, so it guarantees to return optimal solution under graph search v3 and tree search, and $\forall n, h_3(n) > h_1(n) \Rightarrow h_3$ is more efficient than $h_1$.
+  \item 
+    At $n = A$
+    \begin{align*}
+      h_6(n) = \max \{h_3(n), h_5(n)\} &= \max \{3,4\} = 4 \\
+      h^*(n) &= 3 \\
+      \Rightarrow h_6(n)  &> h^*(n) \\
+      \Rightarrow h_6(n) &\text{ is inadmissible}
+    \end{align*}
+\end{enumerate}
+\end{document}

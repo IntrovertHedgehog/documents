@@ -1,0 +1,376 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "lmodern" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #b5bd68
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Le Van Minh
+\end_layout
+
+\begin_layout Standard
+Tan San Xuin
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 1
+\end_layout
+
+\begin_layout Standard
+(a)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+L=(Q-K_{0})^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- Labour is independent from w, r and increases with Q increasing.
+\end_layout
+
+\begin_layout Standard
+(b)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+SRTC=w(Q-K_{0})^{2}+rK_{0}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- SRTC increases with 
+\begin_inset Formula $Q$
+\end_inset
+
+, or 
+\begin_inset Formula $w$
+\end_inset
+
+, or 
+\begin_inset Formula $r$
+\end_inset
+
+ increase
+\end_layout
+
+\begin_layout Standard
+(c) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{L,K}{min}LRTC=wL+rK
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+s.t
+\begin_inset Formula 
+\[
+Q=\sqrt{L}+K
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Tangency condition:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{1}{2\sqrt{L}}=\frac{w}{r}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+L=(\frac{r}{2w})^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+K=Q-\frac{r}{2w}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(d) As Q increases, K increases and L is constant.
+\end_layout
+
+\begin_layout Standard
+- L is not normal input.
+\end_layout
+
+\begin_layout Standard
+- K is a normal input.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 3
+\end_layout
+
+\begin_layout Standard
+(a) LRTC minimizing problem
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{L,K}{min}LRTC=wL+rK
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+s.t.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Q=L+K
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We have:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{MP_{L}}{p_{L}}=\frac{1}{1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{MP_{K}}{p_{K}}=\frac{1}{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow\frac{MP_{L}}{p_{L}}>\frac{MP_{K}}{p_{K}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Therefore, to minimize cost, SFA has to only buy labour with no capital
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+L & =Q\\
+K & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+LRTC=L=Q
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(b) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+Q<5 & L=0\\
+Q\ge5 & L=Q-5
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+Q<5 & SRTC=10\\
+Q\ge5 & SRTC=Q+5
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(c)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Pictures/Screenshots/2022-10-24_11-49.png
+	scale 35
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

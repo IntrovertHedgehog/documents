@@ -1,0 +1,612 @@
+---
+title: "Week 6: Simmer Case Studies"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(stringr)
+library(simmer)
+library(simmer.plot)
+library(DiagrammeRsvg)
+library(rsvg) 
+library(scales)
+knitr::opts_chunk$set(echo = FALSE)
+
+ihpp <- function(lambda_fn, lambda_bound, end_time) {
+  x_vec <- NULL
+  x <- 0
+  while(TRUE) {
+    U <- runif(1)
+    x <- x - (1/lambda_bound)*log(U)
+    if(x > end_time)
+      break
+    V <- runif(1)
+    ratio1 <- lambda_fn(x)/lambda_bound
+    if(V <= ratio1)
+      x_vec <- c(x_vec, x)
+  }
+  x_vec
+}
+
+lam_fn <- function(x) {
+  if(x <= 4) {
+    return(2)
+  } else if (x <= 5){
+    return(6)
+  } else {
+    return(2)
+  }
+}
+l2 <- Vectorize(lam_fn)
+```
+
+## 6-0 Introduction
+
+For this week, we shall focus on a few case studies using `simmer`. The purpose 
+is mainly to walk through the activity diagram and the code. In the end, the goal
+is to become more familiar with the elements of simmer, and to understand how they 
+can be used to code up real-life scenarios.
+
+The three scenarios are described briefly here:
+
+1. *Non-constant arrival rates*. Thus far in the course, we have modeled the 
+    arrival rates as being constant over time. But what if certain times trigger 
+    more arrivals than others? This case study demonstrates how to use an 
+    Inhomogeneous Poisson Process (IPP) to model such arrivals.
+2. *Insurance risk*. An insurance company collects premiums from policyholders, 
+    and pays out when people make a claim. The company usually sets aside a 
+    certain amount of money to handle the pay outs. This simulations allows us to 
+    assess if the amount set aside is enough.
+3. *Repair centre*. This case study models a scenario where a factory requires 
+    a certain number of machines up and running all the time. With this simulation,
+    we can investigate how many spares should be kept, or how many repairmen should 
+    be hired.
+    
+The references section contains links to many case studies using simmer. Studying 
+these examples is a very good way to improve with `simmer`.
+
+## 6-1 Arrival Rates
+
+### Description
+
+Suppose we have a bank counter with a single counter that is open for 8 hours a
+day. The typical assumption concerning customer arrivals is that the customers
+arrive at time intervals that are Exponentially distributed with some rate
+$\lambda$.
+
+This distributional assumption means that customers arrive at a **constant
+rate** over the course of the day. The implications of this assumption are that:
+
+1. The average number of customers arriving per unit time is $\lambda$. We sometimes 
+   refer to $\lambda$ as the *intensity* of the arrival process.
+2. The average inter-arrival time between customers is $1 / \lambda$.
+
+Such an arrival process is also sometimes referred to as a Homogeneous Poisson
+Process (HPP).  However, this is not always realistic. At a bank, it is typical
+that more customers arrive during lunch time. In this case study, we shall
+demonstrate how we can model an arrival process whose intensity changes with
+time.
+
+### Activity Diagram
+
+First, let's draw up the activity diagram for this simple scenario. We shall
+assume that service times are distributed with a slightly smaller mean than than
+the inter-arrival times.
+
+```{r fig.align='center', out.width='80%'}
+knitr::include_graphics("www/single_server_queue.png")
+```
+
+### Simmer Code (Constant arrivals)
+
+To begin, of course, we load the libraries.
+
+```{r eval=FALSE, echo=TRUE}
+library(simmer)
+library(simmer.plot)
+```
+
+The next line initialises the simulation environment. Although nothing happens 
+after running this line, in `simmer`, it is important to initialise this environment
+before coding the trajectory, since the trajectory will sometimes refer to it to
+extract attributes.
+
+```{r init01, echo=TRUE}
+bank <- simmer("bank")
+```
+
+The trajectory of each customer is straightforward - a customer arrives and 
+joins the queue if the server is occupied. Once the customers ahead of him/her
+have been served, the customer will be served. Upon completion of the service, 
+the customer leaves the bank.
+
+```{r traj01, echo=TRUE}
+customer <- trajectory("customer") %>% 
+  log_("Arriving..") %>% 
+  seize("counter") %>% 
+  timeout(function() rexp(1, rate=2.1)) %>% 
+  release("counter") %>%
+  log_("Departing now...")
+```
+
+Take note that, within the timeout above, we call 
+````
+function() rexp(1, rate=2.1))
+````
+instead of 
+````
+rexp(1, rate=2.1)
+````
+The latter will generate a single value for all trajectories. The former will 
+dynamically generate a separate value for each trajectory.
+
+Here is a plot of the trajectory:
+
+```{r echo=FALSE, fig.align='center', out.width='30%'}
+knitr::include_graphics("www/customer-01.png")
+```
+
+We then add the source generator and resource and run the code. We assume that
+there is a constant intensity of $\lambda=2$.
+
+```{r, fig.align='center', out.width='80%', echo=TRUE}
+set.seed(11)
+bank %>% add_generator("Cust.", customer, 
+                       distribution= function() rexp(1, rate=2)) %>% 
+  add_resource("counter") %>% 
+  run(until=8)
+
+plot(get_mon_resources(bank), metric="usage")
+```
+
+Since our service times are quick, there is almost no queue building up in the 
+bank. 
+
+Let us next run the simulation for 100 replications, and then create a histogram
+of all the arrival times. As we pointed out, a constant intensity should
+manifest as a histogram with equal heights throughout the 8-hour time interval.
+
+```{r results=FALSE, echo=TRUE}
+single_rep <- function() {
+  bank <- simmer("bank")
+  
+  customer <- trajectory("customer") %>% 
+    log_("Arriving..") %>% 
+    seize("counter") %>% 
+    timeout(function() rexp(1, rate=2.1)) %>% 
+    release("counter") %>%
+    log_("Departing now...")
+  
+  bank %>% add_generator("Cust.", customer, 
+                         distribution= function() rexp(1, rate=2)) %>% 
+    add_resource("counter") %>% 
+    run(until=8) %>% wrap()
+}
+
+set.seed(11)
+bank_list <- replicate(100, single_rep())
+```
+
+In order to retrieve the arrival times, we shall use the `get_mon_arrivals`
+function, and include the flag `ongoing=TRUE`. Without this flag, we will only
+be given the arrivals of customers who completed service. In addition, we must
+point out that the `simmer` package will set the final customer arrival time to
+be -1. We need to remove that final arrival for each replication as well.
+
+```{r echo=TRUE}
+all_arrivals <- get_mon_arrivals(bank_list, ongoing=TRUE)
+```
+
+Here is what the arrival data frame looks like:
+```{r echo=FALSE}
+knitr::kable(head(all_arrivals))
+```
+
+Here is the code that will create a histogram of all arrival times:
+```{r fig.align='center', out.width='80%', echo=TRUE}
+arr_times <- all_arrivals$start_time[all_arrivals$start_time > 0]
+hist(arr_times, main="Histogram of arrival times")
+```
+
+### Simmer Code (Non-constant arrivals)
+
+```{r echo=FALSE}
+ihpp <- function(lambda_fn, lambda_bound, end_time) {
+  x_vec <- NULL
+  x <- 0
+  while(TRUE) {
+    U <- runif(1)
+    x <- x - (1/lambda_bound)*log(U)
+    if(x > end_time)
+      break
+    V <- runif(1)
+    ratio1 <- lambda_fn(x)/lambda_bound
+    if(V <= ratio1)
+      x_vec <- c(x_vec, x)
+  }
+  x_vec
+}
+```
+
+An Inhomogeneous Poisson Process is one where the intensity varies over time.
+Our function `ihpp()` will generate arrivals according to an IPP of your
+specification.
+````
+ihpp <- function(lambda_fn, lambda_bound, end_time) {
+  ...
+}
+````
+
+The arguments to this function are:
+
+1. The intensity function. This is a non-negative function that specifies the 
+   instantaneous intensity of arrivals. Homogeneous Poisson Processes have a 
+   constant intensity.
+2. An upper bound on the intensity function.
+3. An end time to the simulation horizon.
+
+Let's put things in the context of our bank. Earlier, our bank assumed a constant 
+intensity of 2 customers arriving per unit time. Let's now assume that, during 
+lunch time, the intensity of customers triples. In other words,
+
+\begin{equation*}
+\lambda(t)  = \left\{ \begin{array}{l}
+2, \quad \text{first 4 hours}\\
+6, \quad \text{fifth (lunch) hour}\\
+2, \quad \text{last 3 hours}
+\end{array} \right.
+\end{equation*}
+
+In order to use the `ihpp` function, we need an R function that returns the intensity 
+values above:
+```{r ihpp-01, echo=TRUE, eval=TRUE}
+lam_fn <- function(x) {
+  if(x <= 4) {
+    return(2)
+  } else if (x <= 5){
+    return(6)
+  } else {
+    return(2)
+  }
+}
+l2 <- Vectorize(lam_fn)
+# test the function:
+l2(c(3.4, 4.1, 4.2, 7.6))
+```
+
+The function will return 2 or 6, depending on which hour the input value corresponds 
+to. 
+
+Here is how we can summon the `ihpp` function, with the `l2` function as input.
+Try it out, with different seeds:
+
+```{r ihpp-02, exercise=TRUE}
+set.seed(11)
+ihpp(lambda_fn = l2, lambda_bound = 6, end_time = 8)
+
+```
+
+You should observe a lot more arrivals between 4 and 5. Now let's re-run the 
+earlier simulation model, and re-draw the histogram. Notice that, when 
+we add the generator, we have to pre-compute the arrivals and use the `at()` 
+function to fix the arrival times for each replication. 
+
+```{r results=FALSE, echo=TRUE, fig.align='center', out.width='80%'}
+single_rep2 <- function() {
+  arr_times <- ihpp(lambda_fn = l2, lambda_bound = 6, end_time = 8)
+  bank <- simmer("bank")
+  
+  customer <- trajectory("customer") %>% 
+    log_("Arriving..") %>% 
+    seize("counter") %>% 
+    timeout(function() rexp(1, rate=2.1)) %>% 
+    release("counter") %>%
+    log_("Departing now...")
+  
+  bank %>% add_generator("Cust.", customer, distribution= at(arr_times)) %>% 
+    add_resource("counter") %>% 
+    run(until=8) %>% wrap()
+}
+
+set.seed(11)
+bank_list2 <- replicate(100, single_rep2())
+all_arrivals <- get_mon_arrivals(bank_list2, ongoing=TRUE)
+arr_times <- all_arrivals$start_time[all_arrivals$start_time > 0]
+hist(arr_times, main="Histogram of arrival times")
+```
+
+### Summary
+
+* The algorithm in `ihpp` is known as a "thinning algorithm". It is the standard 
+way of generating from an IPP.
+* If it is not intuitive, you could always generate the arrivals in a more 
+crude way - within each bin, you can use an Exponential distribution for inter-arrival
+times.
+* Utilising a more realistic arrival process can result in more accurate estimation
+of the utilisation of the server.
+
+## 6-2 Insurance risk
+
+### Description
+
+Suppose that each policyholder of a casualty insurance company generates a claim
+according to independent Poisson processes with a common rate $\lambda = 1$.
+This means that there are, on average, 1 claims per unit time, and the
+inter-arrival time is Exponentially distributed with rate 1. Assume that each
+claim amount is distributed as $Gamma(10, 1.5)$ (in thousands of dollars). It
+may be useful to consider a unit of time to be one month.
+
+Suppose that the company begins with $n_0$ policyholders, but that new
+policyholders signup according to a Poisson process with rate $\nu=3$. Each
+existing policyholder remains with the company for an Exponentially distributed
+time with rate $\mu=1/20$. Finally,suppose that each policyholder pays the
+insurance firm at a fixed rate $p_0$ per unit time.
+
+Suppose that the company begins with an initial capital of $a_0$ (in thousands of
+dollars). We are interested in using simulation to estimate the probability that
+the firm's capital is always nonnegative at *all times up to time $T$*.
+
+### The system
+
+We shall consider each policyholder to be an entity.  In terms of resources,
+there are none!
+
+To keep track of claims, claim times and departure times, we shall use
+attributes for each entity. Policyholders experience two types of events:
+departures and claims. Claims could occur multiple times, but a departure only
+occurs once. As soon as a policyholder arrives, we generate and store his/her
+departure time. Claims are then generated one at a time. Each time, the claim
+timing is compared to the departure time to decide which happens next.
+
+Here is the activity diagram for the policyholder example:
+
+```{r fig.align='center', out.width='80%', echo=FALSE}
+knitr::include_graphics("www/policyholder-activity.png")
+```
+
+The comparison between next claim and departure time will be implemented using
+the `branch` statement in `simmer`, but in order to implement the dashed arrow
+that takes the entity back to the comparison, we shall use the `rollback`
+function from the `simmer` package.
+
+### Simmer Code 
+The following code initialises the environment with 5 initial policyholders, 
+$a_0=3.5$ million dollars to begin with, and a fixed premium of 500 per month for 
+all customers.
+
+```{r echo=TRUE}
+insurance_env <- simmer() %>% 
+  add_global("a0", 3500) %>% 
+  add_global("p0", .5)
+```
+
+The next code chunk defines the trajectory of each customer. Take some time to relate 
+the lines of code that correspond to the elements in the activity diagram. 
+
+Remember that `add_global` and `set_global` deal with attributes that *all*
+entities can access and modify. On the other hand, `set_attribute` and
+`get_attribute` correspond to entity-specific attributes, e.g. the departure
+time of a particular policyholder.
+
+```{r echo=TRUE}
+m4 <- trajectory("policyholder") %>% 
+  log_("Policy begins..") %>% 
+  set_attribute("dep_time", values = function() now(insurance_env) + rexp(1, rate=1/20)) %>% 
+  set_attribute("tt_next_claim", values = function() rexp(1, rate=1)) %>% 
+  branch(function() {
+    attribs <- get_attribute(insurance_env, c("dep_time", "tt_next_claim"))
+    if(attribs[1] <= now(insurance_env) + attribs[2]){
+      return (1) # depart sub-trajectory
+    } else {
+      return (2) # claim sub=trajectory
+    }
+  }, continue=FALSE,
+  trajectory() %>% 
+    set_attribute("premium_time", 
+                  function() get_attribute(insurance_env, "dep_time") - now(insurance_env)) %>% 
+    timeout(function() get_attribute(insurance_env, "premium_time")) %>% 
+    log_("Processing premiums") %>%
+    set_global("a0", 
+               function() get_global(insurance_env, "p0")*get_attribute(insurance_env, "premium_time"), 
+               mod="+") %>% 
+    log_("Ending policy.."),
+  trajectory() %>% 
+    timeout(function() get_attribute(insurance_env, "tt_next_claim")) %>% 
+    log_("Processing premiums") %>%
+    set_global("a0", function() 
+      get_global(insurance_env, "p0")*get_attribute(insurance_env, "tt_next_claim"), mod="+") %>% 
+    log_("Processing claim") %>% 
+    set_global("a0", function() -rgamma(1, 10, 1.5), mod="+") %>% 
+    rollback(7, Inf)
+  )
+```
+
+
+Here is an annotated diagram of the simmer code:
+
+```{r fig.align='center', out.width='100%', echo=FALSE}
+knitr::include_graphics("www/policyholder-traj-annotated.png")
+```
+
+Here's how we can run one replication of the simulation. Remember that we wanted 
+$n_0$ policyholders to begin with, and the rest to arrive later according to a 
+Poisson process. One way to handle that is to have two generators - one beginning 
+at 0, and the other using the Exponential generator.
+
+The following code runs the simulation for 2 years.
+
+```{r results=FALSE, echo=TRUE}
+n0 <- 5
+set.seed(41)
+insurance_env %>% 
+  add_generator("initial_holder", m4, at(rep(0, n0)), mon=2) %>%
+  add_generator("new_holder", m4, function() rexp(1, 3), mon=2) %>% 
+  run(until=24)
+```
+
+To retrieve the results, we run `get_mon_attributes` and then extract the 
+values for `a0`. 
+
+```{r echo=TRUE}
+get_a0 <- get_mon_attributes(insurance_env)
+any(get_a0$value[get_a0$key == "a0"] < 0)
+```
+
+For those of you more familiar with dplyr code, you could use this syntax:
+
+```{r echo=TRUE, eval=FALSE}
+dplyr::filter(get_a0, key == "a0") %>% 
+  dplyr::summarise(negative = any(value < 0))
+```
+
+### Summary
+
+This simulation can be used by the insurance company to decide:
+
+1. an appropriate price for premiums
+2. an appropriate initial amount to set aside.
+3. to gauge when the initial amount might run out.
+
+## 6-3 Repair centre
+
+### Description
+
+A system needs $n$ working machines to be operational. Whenever a working
+machine breaks down, it is immediately replaced by one of $s$ spare machines.
+The broken machine is sent to the repair facility, which consists of one
+repair-person who repairs one machine at a time.
+
+### The system
+
+The time that a machine functions for will be uniformly distributed with minimum 
+5 and maximum 20. The repair time is uniformly distributed with minimum 2 and 
+maximum 6. To begin, suppose we have 2 spares, and that n = 5.
+
+We shall consider each functioning machine *station* to be an entity. They all
+"arrive" at time 0. The number of spares will be set as a global variable within
+the simulation environment. Every time a machine breaks down, we decrease the
+number of available spares by 1, if there are any available. If the number of
+spares is none, then the simulation should end cleanly, recording the crash time as an 
+attribute.
+
+If there *are* spares, the trajectory will split into two clones. This will use the 
+`clone` function in simmer. Cloning is different from branching. With the branch statement,
+only one of the sub-trajectories will be continued. With clones, all of them continue
+independently of one another.
+
+One of the clones will be sent to the repair room. There, it will wait its turn
+to seize and release the repairman resource. Upon completion, the number of
+spare machines will be updated. The other clone will rollback to begin a new
+phase of working, thus re-starting service.
+
+In terms of resources, there is only one - the repairman. There is an infinite
+queue associated with him.
+
+Before we proceed to any code, we draw up a simple diagram to visualise what 
+happens in our system.
+
+```{r echo=FALSE, fig.align='center', out.width='80%'}
+knitr::include_graphics("www/repair_doodle.png")
+```
+
+### Simmer code 
+
+The following initialises the environment with 3 spares. A global attribute `CRASH` 
+will store the crash status. When a machine breaks down *and* there are no spares,
+the `CRASH` attribute will be set to 1, and the time will be recorded as 
+`crash_time`.
+
+```{r echo=TRUE}
+repair_env <- simmer() %>%
+  add_global("S", 3) %>% 
+  add_global("CRASH", 0)
+```
+
+Here is the code for the trajectory. Below it we have an annotated flowchart 
+for your reference.
+
+```{r echo=TRUE}
+m2 <- trajectory("station") %>% 
+  log_("Starting work now..") %>% 
+  timeout(function() runif(1, 5, 20)) %>% 
+  branch(function() {
+    num_spares <- get_global(repair_env, "S")
+    crashed_status <- get_global(repair_env, "CRASH")
+    if(num_spares > 0) {
+      return(0)
+    } else if (crashed_status == 0) {
+      return(1)
+    } else {
+      return(2)
+    }
+  }, continue = c(FALSE, FALSE),
+  trajectory() %>%  
+    set_global("crash_time", function() now(repair_env)) %>%  
+    set_global("CRASH", 1) %>% 
+    log_("Just crashed.. no more spares.. shutting down."),
+  trajectory() %>%  
+    log_("No more spares.. shutting down.")
+  )  %>% 
+  set_global("S", -1, mod="+") %>% 
+  clone(n=2, 
+        trajectory() %>% 
+          log_("Going for repair now") %>%  
+          seize("repairman") %>%  
+          timeout(function() runif(1, 2, 6)) %>%  
+          release("repairman") %>%  
+          branch(function() {get_global(repair_env, "CRASH") != 1}, 
+                 continue = TRUE,
+                 trajectory() %>% set_global("S", 1, mod="+")) %>% 
+          log_("finished repair"),
+        trajectory() %>% 
+          log_("Re-starting with replacement") %>% 
+          rollback(amount = 5, times=Inf)
+        )
+```
+
+```{r echo=FALSE, fig.align='center', out.width='100%'}
+knitr::include_graphics("www/repair_annotated.png")
+```
+
+To run the model, we simply initialise the 10 machines and run the code. We 
+do not need to specify an end timing to `run` because only 10 entities were 
+generated. Once the crash occurs, the remaining machines exit cleanly.
+
+```{r results=FALSE, echo=TRUE}
+set.seed(15)
+repair_env %>% 
+  add_generator("M", m2, at(rep(0, 10)), mon=2)  %>% 
+  add_resource("repairman", capacity = 1) %>% 
+  run()
+```
+
+To retrieve the crash time for a replication, we simply do:
+```{r echo=TRUE}
+get_global(repair_env, "crash_time")
+```
+
+### Summary
+
+A simulation such as the above can be used to estimate:
+
+1. how many repairmen to employ (for a desired minimum crash time),
+2. how many spares to have (for a desired minimum crash time), or
+3. the system up-time, for a fixed number of repairmen and spares.
+
+## References
+
+1.  <a href="https://en.wikipedia.org/wiki/Poisson_point_process" target="_blank">Poisson Point processes</a> The wikipedia page on poisson 
+processes is very technical, but there are couple of sections on how we simulate from 
+it (section 2, 3, an 4)
+2.  <a href="https://r-simmer.org/" target="_blank">Simmer website</a> The official 
+simmer website contains excellent documentation on the functions and several examples 
+using simmer. Take a look at the "Articles" section to find these. 
+    In addition, simmer has several companion packages. We used one of these 
+    (simmer.plot) but there are a few others that might be helpful. For instance,
+    the simmer.bricks can be used for commonly used trajectory portions.
+3. <a href="https://linc.nus.edu.sg/record=b1774538">Computer simulation in management 
+science</a> This book contains many examples of simulation being used for management 
+decisions. Although the main emphasis is on software architecture, there are many examples 
+that you could consider applying, or just implementing in simmer for practice.

@@ -1,0 +1,78 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Problem Set 1 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{enumerate}[leftmargin=\labelsep]
+  % question 1
+  \item \ \\
+  \begin{enumerate}[leftmargin=\labelsep]
+    \item \ \\
+    \begin{center}
+     \begin{tabular}{ |c|c|c| }
+     \hline
+      & \textbf{Environment Characteristics} & \textbf{Sudoku Puzzle} \\
+     \hline
+     1  & Fully vs Partially Observable & Fully Observable  \\
+     \hline
+     2  & Deterministic vs Stochastic & Deterministic \\
+     \hline
+     3  & Episodic vs Sequential & Episodic \\
+     \hline
+     4  & Discrete vs Continuous & Discrete \\
+     \hline
+     5  & Single vs Multi-Agent & Single-Agent \\
+     \hline
+     6  & Static vs Dynamic & Static \\
+     \hline 
+     \end{tabular}
+    \end{center}
+
+    \item Define the search space:
+    \begin{itemize}
+      \item \textbf{State $s_i \in S$:} is the layout of the current Sudoku board, represented as a 2D array
+      \item \textbf{Initial state $s_0$:} A full board with no hole in it, with the rules of Sudoku board satisfied
+      \item \textbf{Goal state:} The goal test returns true when there's no more valid action to be taken at the current state
+      \item \textbf{Actions:} at each state $s$, there's a set of available actions $A$, each action deletes a square that can be perfectly recovered
+      \item \textbf{Transition function $T$:} $T(s_i, a_j) = s_t$ where $s_t$ is the is the same as $s_i$ except a square is blank when it is erased by action $a_j$
+    \end{itemize}
+  \end{enumerate}
+  % question 2
+  \item
+    \begin{enumerate}
+      \item 
+      \begin{itemize}
+        \item \textbf{Tree Search:} Explore all paths including redundant paths.
+        \item \textbf{Graph Search:} Only explore unvisited paths (v1) or non-redundant paths (v2). 
+      \end{itemize}
+      \item Assume early goal checking when pushing the nodes to the frontier:
+      \begin{enumerate}
+        \item \textbf{DFS (tree):} $S-B-C-E-D-A-D-E-D-D-F-G$
+        \item \textbf{DFS (graph):} $S-B-C-E-D-A-F-G$
+        \item \textbf{BFS (tree):} $S-B-C-A-D-E-E-F-D-D-G$
+        \item \textbf{BFS (graph):} $S-B-C-A-D-E-F-G$
+      \end{enumerate}
+    \end{enumerate}
+  % question 3
+  \item Supposed there's an optimal result $(v, c)$ such that $v$ is a goal node with cheapest path cost $c$. For UCS to be optimal, it has to encounter $(v, c)$ before any possible goal. This is true because the nodes being goal checked by UCS are in cost-increasing order, so if $c$ is the cheapest goal path cost, $v$ is the first goal to be checked. \\
+    \textbf{Proof of cost-increasing order:} When a node $v_0$ is popped from the frontier $F$, it adds it unvisited adjacent nodes $V_0$ to the frontier. Frontier after the popping $F'= F \cup V_0 \setminus \{v_0\}$. All nodes in $F$ have more expensive path cost than $v_0$, and each nodes in $V_0$ has path cost at least as much as $cost(v_0) + \epsilon$, assuming $\text{cheapest edge cost} \ge \epsilon > 0$. Therefore, all nodes in the new frontier $F'$ are more expensive than $cost(v_0) \Rightarrow$ the next popped node is more expensive than $v_0 (QED)$. 
+    % question 4
+  \item 
+  \begin{itemize}
+    \item \textbf{State representation:} The current assembling of the jigsaw table
+    \item \textbf{Initial state:} The empty jigsaw table
+    \item \textbf{Actions:} Given the current state of the puzzle, pick an unused piece that can fit adjacently to the current board, and put it in, or remove one of the connected pieces.
+    \item \textbf{Transition model:} Putting the chosen piece into the current table to get the resulting state
+    \item \textbf{Step cost:} Actions have equal costs
+    \item \textbf{Goal test:} Test if the current board has $n$ correctly assembled pieces
+  \end{itemize}
+  % question 5
+  \item Assume early goal check when pushing new nodes to the frontier. The order of goal checking is: $S-A-B-C-F-D-H-D-K-G$
+\end{enumerate}
+\end{document}

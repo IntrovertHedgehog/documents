@@ -1,0 +1,501 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #b5bd68
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+
+\series bold
+Question 3
+\end_layout
+
+\begin_layout Standard
+(a)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41609.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(b)
+\end_layout
+
+\begin_layout Standard
+- It's not Pareto efficient.
+ With the points along the line BB', Muntz is indifferent but Charles is
+ better off.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41608.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(c)
+\end_layout
+
+\begin_layout Standard
+- C is not Pareto efficient.
+ The colored segment is better off for both of them.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41607.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(d)
+\end_layout
+
+\begin_layout Standard
+- D is Pareto efficient.
+ Moving anywhere means 
+\begin_inset Formula $\downarrow x_{1}^{C}\ or\ \downarrow x_{2}^{C}$
+\end_inset
+
+ and Charles will always be worse off.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41606.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(e)
+\end_layout
+
+\begin_layout Standard
+- E is Pareto efficient.
+ Moving anywhere means 
+\begin_inset Formula $\downarrow x_{1}^{M}\ or\ \downarrow x_{2}^{C}$
+\end_inset
+
+ and either Charles or Muntz must be worse off.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41605.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(f)
+\end_layout
+
+\begin_layout Standard
+- Since 
+\begin_inset Formula $U^{M}$
+\end_inset
+
+ is independent from 
+\begin_inset Formula $x_{2}^{M}$
+\end_inset
+
+, but 
+\begin_inset Formula $U^{C}$
+\end_inset
+
+ increases as 
+\begin_inset Formula $x_{2}^{C}$
+\end_inset
+
+ increases, it is best to allocate all available 
+\begin_inset Formula $x_{2}$
+\end_inset
+
+ to Charles.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow All\ point\ where\ x_{2}^{C}=6
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- Since both Charles and Muntz likes 
+\begin_inset Formula $x_{1}$
+\end_inset
+
+, so every point on 
+\begin_inset Formula $x_{2}^{C}=6$
+\end_inset
+
+ is unnegotiable 
+\begin_inset Formula $\Rightarrow$
+\end_inset
+
+All of those points are Pareto efficient
+\end_layout
+
+\begin_layout Standard
+- Contract curve function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x_{2}^{C}(x_{1}^{C})=6
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41604.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 4
+\end_layout
+
+\begin_layout Standard
+(a)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41618.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(b)
+\end_layout
+
+\begin_layout Standard
+- Using tangental condition to check for efficiency
+\end_layout
+
+\begin_layout Standard
+- For Carl:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U^{C}=ln(x_{1}^{C})+ln(x_{2}^{C})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow\begin{cases}
+MU_{1}^{C} & =\frac{dU^{C}}{dx_{1}^{C}}=\frac{1}{x_{1}^{C}}\\
+MU_{2}^{C} & =\frac{dU^{C}}{dx_{2}^{C}}=\frac{1}{x_{2}^{C}}
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+MRS_{1,2}^{C}=\frac{MU_{1}^{C}}{MU_{2}^{C}}=\frac{x_{2}^{C}}{x_{1}^{C}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- Same for Ellie:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+MRS_{1,2}^{E}=\frac{MU_{1}^{E}}{MU_{2}^{E}}=\frac{x_{2}^{E}}{x_{1}^{E}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- If endowment point is efficient:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+MRS_{1,2}^{C}=MRS_{1,2}^{E}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{x_{2}^{C}}{x_{1}^{C}}=\frac{x_{2}^{E}}{x_{1}^{E}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{2}{7}=\frac{3}{3}\ (Contradiction!)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- So the endowment point is Pareto inefficient.
+\end_layout
+
+\begin_layout Standard
+(c) - Feasibility:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x_{1}^{E}=10-x_{1}^{C}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x_{2}^{E}=5-x_{2}^{C}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+- Tangental condition:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+MRS_{1,2}^{C}=MRS_{1,2}^{E}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{x_{2}^{C}}{x_{1}^{C}}=\frac{x_{2}^{E}}{x_{1}^{E}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{x_{2}^{C}}{x_{1}^{C}}=\frac{5-x_{2}^{C}}{10-x_{1}^{C}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x_{2}^{C}(10-x_{1}^{C})=x_{1}^{C}(5-x_{2}^{C})
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+10x_{2}^{C}=5x_{1}^{C}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x_{2}^{C}=\frac{1}{2}x_{1}^{C}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Downloads/msg1156848282-41617.jpg
+	scale 15
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

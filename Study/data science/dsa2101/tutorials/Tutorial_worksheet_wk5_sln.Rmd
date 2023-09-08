@@ -1,0 +1,143 @@
+---
+title: "Week 5 Tutorial"
+author: "Enter your name (Matriculation number)"
+output:
+  html_document:
+    df_print: paged
+urlcolor: blue
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE, 
+                      fig.align = "center",  out.width = "80%")
+```
+
+# Question 1. Retrenchment by industry
+We would like to practice how to obtain data from online APIs. We want to retrieve the data set **Retrenchment by Industry (Level 1)** from the following website:
+
+https://data.gov.sg/dataset/retrenched-employees-by-industry-and-occupational-group-quarterly?view_id=c51ab6a4-6af8-4334-8061-e2dfc39a06ea&resource_id=3d180571-81d3-4834-a759-8374806b731e
+
+## Question 1.1
+
+Use the Data API link on the web page to download the full data set by its resource id.
+
+```{r}
+library(jsonlite)
+root_url = "https://data.gov.sg"
+url = paste(root_url, 
+             "/api/action/datastore_search?",
+             "resource_id=3d180571-81d3-4834-a759-8374806b731e",
+             sep = "")
+
+emp_json = fromJSON(url)
+r_emp = emp_json$result$records         # Number of rows after the first retrieval
+total_records = emp_json$result$total   # Total number of rows in the final data set
+
+# The following loop will continue to submit queries
+# ... until the required number of rows are obtained.
+
+while(nrow(r_emp) < total_records) {
+  
+  url1 = paste(root_url, 
+              emp_json[["result"]][["_links"]][["next"]],
+              sep = "")
+  
+  emp_json = fromJSON(url1)
+  r_emp = rbind(r_emp, emp_json$result$records)
+  
+}
+
+r_emp
+```
+
+## Question 1.2 
+
+Remove the `_id` column and name the new data frame as `df_retrench`.
+
+```{r}
+df_retrench = r_emp[, -1]
+```
+
+## Question 1.3
+
+Continue to work with `df_retrench`. Convert `retrench`, `retrench_term_contract`, `retrench_permanent` to numeric. Convert `industry1` to factor. 
+
+```{r}
+i = grep("retrench", names(df_retrench))
+df_retrench[, i] = apply(df_retrench[, i], 2, function(x) as.numeric(x))
+df_retrench$industry1 = factor(df_retrench$industry1)
+```
+
+## Question 1.4
+
+Keep only the observations in the year of 2020. There are missing values in the data frame. Replace the missing entries with zero. Store it in a new object named `df_retrench2020`.
+
+```{r}
+i = grep("2020", df_retrench$quarter)
+df_retrench2020 = df_retrench[i, ]
+df_retrench2020[is.na(df_retrench2020)] = 0
+```
+
+## Question 1.5
+In this question, you are free to explore either the 2020 data or the entire data set. Some suggested questions you could ask:
+
++ In 2020, which industry observed the most retrenchment?
+
++ Which industry is the most persistent (least impacted) during 2020-2022? Are there any surprising patterns you found in the data?
+
+You can further investigate retrenchments in Singapore by querying **Retrenchment by Industry (Level 2)** from data.gov.sg -- it gives your additional information on detailed industry groups. 
+
+# Question 2 Hawkers data set
+
+Read the data into `R` and name it `hawk`. The following command will return a list of length 116. Each component of that list will contain information on a hawker center. Inspect the structure to verify this.
+
+```{r include = TRUE}
+hawk = readRDS("../data/hawker_ctr_raw.rds")
+hawk = hawk[[1]][-1]
+```
+
+## Question 2.1
+
+Write a function that works in the following way: Given two hawker center names, it computes the point-to-point distance between them using the `XY` coordinates:
+
+\[ dist = \sqrt{(x_1-x_2)^2 + (y_1 - y_2)^2} \]
+
+```{r}
+library(stringr)
+all_names = sapply(hawk, function(x) x$NAME)
+
+compute_dist = function(name1, name2) {
+  
+  id_1 = which(all_names == name1)
+  id_2 = which(all_names == name2)
+  
+  coord_1 = as.numeric(str_split(hawk[[id_1]]$XY, ",")[[1]])
+  coord_2 = as.numeric(str_split(hawk[[id_2]]$XY, ",")[[1]])
+  
+  dist = sqrt(sum((coord_1 - coord_2)^2))
+  dist
+}
+```
+
+```{r include = FALSE}
+dist_example = compute_dist("Tanglin Halt Market", "Taman Jurong Market & Food Centre")
+```
+
+The `XY` coordinate in this data uses the [SVY21 plane coordinate system](https://app.sla.gov.sg/sirent/About/PlaneCoordinateSystem), which is maintained by the Singapore Land Authority. The unit it uses is in meters. In our example, the distance between **Tanglin Halt Market** and **Taman Jurong Market & Food Centre** is `r dist_example` meters.
+
+## Question 2.2
+
+Run the `compute_dist()` function and generate a data frame that contains **all** $\binom{116}{2}$ combinations of hawker center names and the distance between them. Save the data frame as an object named `dist_df`.
+
+```{r}
+hawk_combn = combn(all_names, 2)
+compute_dist_v = Vectorize(compute_dist)
+all_dist = compute_dist_v(hawk_combn[1, ], hawk_combn[2, ])
+dist_df = data.frame(hawker1 = hawk_combn[1, ],
+                     hawker2 = hawk_combn[2, ],
+                     dist = all_dist, stringsAsFactors = FALSE)
+
+dist_df
+```
+
+

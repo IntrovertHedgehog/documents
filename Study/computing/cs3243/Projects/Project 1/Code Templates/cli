@@ -1,0 +1,170 @@
+for i in range(20):
+  for j in range(20):
+    if (i, j) in path: print("*", end="")
+    elif [i, j] in dct["obstacles"]: print(1, end="")
+    elif [i, j] in dct["goals"]: print(2, end="")
+    elif [i, j] == dct["start"]: print(3, end = "")
+    else: print(0, end="")
+  print()
+
+
+from ucs import search
+dct = {"start": [8, 1], "goals": [[6, 7]], "cols": 10, "rows": 10, "obstacles": [[0, 9], [1, 0], [1, 1], [1, 3], [1, 4], [1, 5], [1, 7], [1, 9], [2, 1], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 9], [5, 0], [5, 1], [5, 3], [5, 4], [5, 5], [5, 7], [5, 9], [6, 5], [7, 0], [7, 1], [7, 2], [7, 3], [7, 5], [7, 7], [7, 9], [9, 0], [9, 1], [9, 3], [9, 5], [9, 7], [9, 9]]}
+search(dct)
+
+dct = {"start": [8, 1], "goals": [[8, 1]], "cols": 10, "rows": 10, "obstacles": [[0, 9], [1, 0], [1, 1], [1, 3], [1, 4], [1, 5], [1, 7], [1, 9], [2, 1], [3, 1], [3, 2], [3, 3], [3, 4], [3, 5], [3, 6], [3, 7], [3, 9], [5, 0], [5, 1], [5, 3], [5, 4], [5, 5], [5, 7], [5, 9], [6, 5], [7, 0], [7, 1], [7, 2], [7, 3], [7, 5], [7, 7], [7, 9], [9, 0], [9, 1], [9, 3], [9, 5], [9, 7], [9, 9]]}
+
+dct = {"start": [1099, 0], "goals": [[0, 0]], "cols": 1100, "rows": 1100, "obstacles": []}
+
+r, c = dct["rows"], dct["cols"]
+                                                       
+if r * c <= 0:
+    return []
+
+if not dct["goals"]:
+    return []
+
+                                                       
+x0, y0 = dct["start"]
+map = [[0 for i in range(c)] for j in range(r)]
+for i, j in dct["obstacles"]:
+    map[i][j] = 1
+
+for i, j in dct["goals"]:
+    map[i][j] = 3
+
+                                                       
+actions = [(1, 0), (0, 1), (0, -1), (-1, 0)]
+front = [(tuple(dct["start"]), 0)]
+                                                       
+def get_path(x: int, y: int) -> List[Tuple[int, int]]:
+    path = [(x, y)]
+    while map[x][y]:
+        path.insert(0, map[x][y])
+        x, y = map[x][y]
+    return path
+
+x0, y0 = dct["start"]
+map = [[0 for i in range(c)] for j in range(r)]
+for i, j in dct["obstacles"]:
+    map[i][j] = 1
+
+for i, j in dct["goals"]:
+    map[i][j] = 3
+
+map[dct["start"][0]][dct["start"][1]] = None
+actions = [(1, 0), (0, 1), (0, -1), (-1, 0)]
+front = [(tuple(dct["start"]), 0)]
+
+path = None
+while front:
+    cur, a = front.pop()
+    x, y = cur[0] + actions[a][0], cur[1] + actions[a][1]
+    a += 1
+    if a < 4:
+        front.append((cur, a))
+    if (x >= r or x < 0 or y >= c or y < 0):
+        continue
+    is_way = map[x][y] == 0
+    is_goal = map[x][y] == 3
+    if not is_way and not is_goal:
+        continue
+    map[x][y] = cur
+    if is_goal:
+        path = get_path(x, y)
+    front.append(((x, y), 0))
+
+st = time.time()
+path = search(dct)
+en = time.time()
+
+r, c = dct["rows"], dct["cols"]
+                                                          
+if r * c <= 0:
+    return []
+                                                          
+if not dct["goals"]:
+    return []
+                                                          
+x0, y0 = dct["start"]
+map = [[0 for i in range(c)] for j in range(r)]
+                                                          
+for i, j in dct["goals"]:
+    map[i][j] = 3
+
+for i, j in dct["obstacles"]:
+    map[i][j] = 1
+
+if map[x0][y0] == 3:
+    return [(x0, y0)]
+
+
+map[x0][y0] = None
+actions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+front = [((x0, y0), 0)]
+                                                          
+def get_path(x: int, y: int) -> list[tuple[int, int]]:
+    path = [(x, y)]
+    while map[x][y]:
+        path.append(map[x][y])
+        x, y = map[x][y]
+    return path
+                                                          
+while front:
+    cur, a = front.pop()
+    print(cur)
+    x, y = cur[0] + actions[a][0], cur[1] + actions[a][1]
+    a += 1
+    if a < 4:
+        front.append((cur, a))
+    if x >= r or x < 0 or y >= c or y < 0:
+        continue
+    is_way = map[x][y] == 0
+    is_goal = map[x][y] == 3
+    if not is_way and not is_goal:
+        continue
+    map[x][y] = cur
+    if is_goal:
+        path = get_path(x, y)
+    front.append(((x, y), 0))
+
+r, c = dct["rows"], dct["cols"]
+if not dct["goals"]:
+    return []
+
+x0, y0 = dct["start"]
+map = [[0 for i in range(c)] for j in range(r)]
+
+# 0: walkable way 1: obstacles 3: goals
+for i, j in dct["goals"]:
+    map[i][j] = 3
+
+for i, j in dct["obstacles"]:
+    map[i][j] = 1
+
+# early goal check is used in the main loop
+# so start = goal case has to be checked here
+if map[x0][y0] == 3:
+    return [(x0, y0)]
+
+# visited nodes stores their parent nodes in the map
+map[x0][y0] = None
+actions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+                                                     
+# heapq for frontier
+front = [(0, x0, y0)]
+path = None
+while front:
+    co, cx, cy = heappop(front)
+    for ax, ay in actions:
+        x, y = cx + ax, cy + ay
+        if x >= r or x < 0 or y >= c or y < 0:
+            continue
+        is_way = map[x][y] == 0
+        is_goal = map[x][y] == 3
+        if not is_way and not is_goal:
+            continue
+        map[x][y] = (cx, cy)
+        if is_goal:
+            path = get_path(x, y)
+        heappush(front, (co + 1, x, y))

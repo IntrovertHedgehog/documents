@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Tutorial 1 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+\begin{document}
+\maketitle
+\section*{Question 1} 
+\begin{enumerate}
+  % question 1
+  \item \begin{itemize}
+    \item Player set $N = \{1, 2, \dots, n\}$
+    \item Each player $i$ has a set of strategies $S_i = \{q \in \mathbb{N}: q \le a\}$, from which they choose their strategy $s_i$
+    \item Strategy profile $s = (s_1, s_2, \dots, s_n)$ is the combination of each player's trategy
+    \item Utility for each player is their total profit:
+      \begin{align*}
+        Q &= \sum_{i \in N} s_i \\
+        u_{i}(s) &= s_i (a - c - Q)
+      \end{align*}
+  \end{itemize}
+  \item Each player best response is:
+    \begin{align*}
+      u_i(s_i, s_{-i}) &= s_i (a - c - \sum s_{-i} - s_i) \\
+      u_i'(s_i, s_{-i}) &= a - c - \sum s_{-i} - 2s_i \\
+      u_i' = 0 &\Leftrightarrow s_i = \frac{a - c - \sum s_{-i}}{2} \\
+      u_i'' = 2 > 0 &\Rightarrow \text{ utility at maximum} \\
+      B_i(s_{-i}) &= \frac{a - c - \sum s_{-i}}{2}
+    \end{align*}
+    We have: 
+    \[
+      2B_i(s_{-i}) + \sum s_{-i} = a - c
+    \]
+    Nash equilibrium $s^* = (s_1^*, s_2^*, \dots, s_n^*)$ is the solution of system:
+    \begin{align*}
+      s_1^* + \sum s_i &= a - c \\
+      s_2^* + \sum s_i &= a - c\\
+      &\dots
+    \end{align*}
+    The system is consistent with only one solution $s = \left(s_i = \frac{a - c}{n + 1}: i \in N\right)$
+  \item 
+    \begin{align*}
+      p^* & = a - Q = a - n\frac{a - c}{n + 1} = a \left(1 - \frac{n}{n+1}\right) + \frac{cn}{n + 1} \\
+      &= \frac{a}{n+1} + c \left(1 - \frac{1}{n+1}\right) \\
+      & \Rightarrow \lim_{n \to +\infty} p^* = c 
+    \end{align*}
+    Profit of each firm is $\pi_i = \pi^*$:
+    \begin{align*}
+      \pi^* &= s_i^*(p^* - c) \\
+      \Rightarrow \lim_{n \to +\infty} \pi^* &= \lim_{n \to + \infty} \frac{a - c}{n + 1} \times (\lim_{n \to +  \infty} p^* - c) \\
+      &= 0 \times (c - c) = 0
+    \end{align*}
+\end{enumerate}
+
+% question 2
+\section*{Question 2} 
+A seller profit monotonically increases with their demand.
+\begin{itemize}
+  \item If $l_i < l_j$, then $q_i \upuparrows l_i \Rightarrow$ not Nash equilibrium
+  \item If $l_i > l_j$, then $q_i \uparrow \downarrow l_i \Rightarrow$ not Nash equilibrium
+  \item If $l_i = l_j$, then $q_i$ can not increase at any other $l_i$
+\end{itemize}
+\[
+  \Rightarrow B_i(l_j) = l_j
+\]
+
+The set of pure-strategy Nash equilibria is $E = \{s = (l_i, l_j) \in S: l_i = l_j\}$
+
+\end{document}
+

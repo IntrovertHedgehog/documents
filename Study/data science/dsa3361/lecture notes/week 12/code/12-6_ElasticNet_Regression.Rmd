@@ -1,0 +1,386 @@
+---
+title: "12-6 ElasticNet Regression"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **12-6 ElasticNet Regression**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will continue to work with the `boston_housing_price` data set. Before proceeding, place the data set `boston_housing_price.csv` in the `data` folder. This R markdown file itself, `12-6_ElasticNet_Regression.rmd`, should be placed in `src` folder.
+
+### Load Libraries
+
+In the following code, we load the required libraries: `car` is required for `vif()`. `corrplot` is required for `corrplot()`. And `plotmo` is required for `plot_glmnet()`.
+
+```{r message=FALSE}
+library(DescTools)
+library(car)  # for vif()
+library(corrplot)  # for corrplot()
+library(glmnet)
+library(plotmo) # for plot_glmnet()
+```
+
+### Load Data
+
+In the following code, we load the data. The data is the same as that used in the previous document (i.e., `df.housing`).
+
+```{r}
+df.housing <- read.csv("../data/boston_housing_price.csv")
+scaler <- apply(df.housing, 2, sd)
+
+df.housing0 <- df.housing
+df.housing <-
+  as.data.frame(apply(df.housing0, 2, function (x)
+    x / sd(x)))
+
+set.seed(4991)
+rate <- 0.2
+train.size <- round(nrow(df.housing) * rate)
+sample <- sample(nrow(df.housing), train.size)
+training <- df.housing[sample,]
+test <- df.housing[-sample,]
+
+train.x <- model.matrix(Price ~ ., data = training)[, -1]
+train.y <- training[, ncol(training)]
+test.x  <- model.matrix(Price ~ ., data = test)[, -1]
+test.y  <- test[, ncol(test)]
+```
+
+In the following code, we define the function `eval_results(fit, true)` to return the evaluation metrics for a given model.
+
+```{r}
+eval_results <- function(fit, true) {
+  actual <- data.matrix(true)
+  SSE <- sum((actual - fit)^2)
+  SST <- sum((actual - mean(actual))^2)
+  R_square <- 1 - SSE / SST
+  data.frame(
+    MSE = MSE(fit, true),
+    MAE = MAE(fit, true),
+    RMSE = RMSE(fit, true),
+    MAPE = MAPE(fit, true),
+    R2 = R_square
+  )
+}
+```
+
+In the following code, we generate the performances of the Ridge Regression Model on both the training data and the test data.
+
+```{r}
+# Train and test Ridge Regression Model 
+set.seed(123)
+cv_ridge <- cv.glmnet(train.x, train.y, 
+                      alpha = 0, type.measure = "mse")
+glm_Ridge <- glmnet(train.x, train.y, 
+                    alpha = 0, 
+                    lambda = cv_ridge$lambda.min)
+
+fit <- predict(glm_Ridge, train.x)
+true <- train.y
+summary_Ridge_train <- eval_results(fit, true)
+
+fit <- predict(glm_Ridge, test.x)
+true <- test.y
+summary_Ridge_test <- eval_results(fit, true)[-5]
+
+```
+
+In the following code, we generate the performances of the LASSO Model on both the training data and the test data.
+
+```{r}
+# Train and test LASSO regression model 
+set.seed(123)
+cv_LASSO <- cv.glmnet(train.x, train.y, alpha = 1, type.measure = "mse")
+glm_LASSO <- glmnet(train.x, train.y, alpha = 1, lambda = cv_LASSO$lambda.min)
+
+fit <- predict(glm_LASSO, train.x)
+true <- train.y
+summary_LASSO_train <- eval_results(fit, true)
+
+fit <- predict(glm_LASSO, test.x)
+true <- test.y
+summary_LASSO_test <- eval_results(fit, true)[-5]
+```
+
+### Slide 11
+
+In the following code, we perform 10-fold cross-validation to determine the optimal value for $\lambda$ for an elastic net model for which $\alpha=0.5$.
+
+```{r}
+set.seed(123)
+cv_ElaNet0.5 <- cv.glmnet(train.x, train.y, 
+                          alpha = 0.5, type.measure = "mse")
+cv_ElaNet0.5
+```
+
+### Slide 12
+
+In the following code, we train an elastic net model for which $\alpha=0.5$ and $\lambda$ is equal to the optimal value for $\lambda$ identified above.
+
+```{r}
+glm_ElaNet0.5 <- glmnet(train.x, train.y, 
+                        alpha = 0.5, 
+                        lambda = cv_ElaNet0.5$lambda.min)
+t(coef(glm_ElaNet0.5))
+```
+
+### Slide 13
+
+In the following code, we compare the coefficients of the ridge regression model, LASSO model and elastic net model.
+
+```{r}
+summary_coef_3models <- cbind(coef(glm_Ridge), 
+                              coef(glm_ElaNet0.5), 
+                              coef(glm_LASSO))
+
+colnames(summary_coef_3models) <- c("Ridge 0", 
+                                    "ElasticNet 0.5", 
+                                    "LASSO 1")
+summary_coef_3models
+```
+
+### Slide 14
+
+Let us return to the output of `cv.glmnet()` function that we used to train the elastic net model: `cv_ElaNet0.5`. We also return `lambda.min` for the elastic net model for which $\alpha=0.5$.
+
+```{r}
+cv_ElaNet0.5
+cv_ElaNet0.5$lambda.min
+```
+
+In the following code, we return the the cross-validation mean-squared error, `cvm`, for the elastic net model, `cv_ElaNet0.5` for which $\alpha=0.5$ and $\lambda=$`lambda.min`.
+
+```{r}
+cv_ElaNet0.5$cvm [cv_ElaNet0.5$lambda == cv_ElaNet0.5$lambda.min]
+```
+
+### Slide 15
+
+In the following code, we return the cross-validation mean-squared errors for the ridge regression model, the LASSO model and the elastic net model for which $\alpha=0.5$, and $\lambda=$`lambda.min`.
+
+```{r}
+# Collect all of the required information into a single dataframe
+summary_lambda_3models <- data.frame(
+  alpha = c(0, 0.5, 1),
+  lambda.min = c(cv_ridge$lambda.min,
+                 cv_ElaNet0.5$lambda.min,
+                 cv_LASSO$lambda.min),
+  MSE = c(cv_ridge$cvm[cv_ridge$lambda==cv_ridge$lambda.min],
+          cv_ElaNet0.5$cvm[cv_ElaNet0.5$lambda==cv_ElaNet0.5$lambda.min],
+          cv_LASSO$cvm[cv_LASSO$lambda==cv_LASSO$lambda.min]))
+
+# Label the rows of the data frame
+row.names(summary_lambda_3models) <- c("Ridge Model", 
+                                      "ElasticNet Model",
+                                      "LASSO Model")
+
+# Return the information
+knitr::kable(summary_lambda_3models, digits = 3)
+```
+
+### Slide 17
+
+In the following code, we define a function `generate_cvmodels(x)` which performs 10-fold cross-validation for an elastic net model with a specified value of $\alpha$. The $\alpha$ value is provided as input parameter `x`.
+
+```{r}
+generate_cvmodels <- function (x) {
+  set.seed(123)
+  return(cv.glmnet(train.x, train.y, 
+                  type.measure = "mse", alpha = x/10))
+}
+```
+
+In the following code, we perform 10-fold cross-validation for 11 different elastic net models for $\alpha=\frac{0}{10}=0$ to $\alpha=\frac{10}{10}=1$. The `lapply()` function is used to call the `generate_cvmodels()` function for each value of $\alpha$ as specified in the sequence `0:10`.
+
+```{r}
+cv_models <- lapply(0:10, generate_cvmodels)
+```
+
+### Slide 18-19
+
+In the following code, we compare the 11 models to select the one with the lowest cross-validation MSE. These are the steps:
+
+-   For each value of $\alpha$ we need to find the $\lambda$ that gives the lowest MSE, and then get the corresponding MSE value. We use the `lapply()` function here to pass the list of models in `cv_models` to a user defined function that returns the MSE associated with `lambda.min`. This gives us 11 MSE values associated with the 11 $\alpha$ values we considered.
+
+```{r}
+# Generate cross-validation mses for all 11 models
+cv_error <- unlist(lapply(cv_models, 
+                          function(x) x$cvm[x$lambda == x$lambda.min] ))
+
+cv_error
+```
+
+-   Next, we need to find the $\alpha$ value that gives us the least MSE in `cv_error`. We use the `which()` function to get the index of the lowest MSE. Index of 0 corresponds to $\alpha=0$ and index 10 corresponds to $\alpha = 1$.
+
+```{r}
+# Return smallest alpha
+(which(cv_error == min(cv_error))-1)/10
+```
+
+Next, we plot the cross-validation MSEs for all 11 different values of $\alpha$.
+
+```{r}
+alpha_seq <- c(0:10) / 10
+plot(
+  alpha_seq,
+  cv_error,
+  main = "Cross Validation Error Rates for the Optimal Models of
+  different Alpha Values",
+  xlab = "Alpha",
+  ylab = "CV MSE",
+  cex = 1.4,
+  cex.lab = 1.3,
+  cex.main = 1.4,
+  pch = 19,
+  col = "blue",
+  type = "b"
+)
+
+text(alpha_seq,
+     cv_error + 0.001,
+     labels = round(cv_error, digits = 3),
+     cex = 1.3)
+
+best_alpha <- which(cv_error == min(cv_error))
+
+points(alpha_seq[best_alpha],
+       cv_error[best_alpha],
+       pch = 17,
+       col = "red",
+       cex = 1.7)
+```
+
+### Slides 20-21
+
+In the following code, define a function `get_best_model(models, errors)` that fetches the optimal pair of parameters that achieves the lowest MSE.
+
+```{r}
+get_best_model <- function (models, errors) {  
+  
+  # models is a list of models, and 
+  # errors is a list of errors
+  best_n <- which(errors == min(errors))
+  return(
+    data.frame(
+      alpha = (best_n - 1)/10,  
+      lambda = models[[best_n]]$lambda.min,
+      CV_error = errors[best_n]
+    )
+  )
+}
+```
+
+In the following code, we to fetch the optimal pair of parameters, that achieves the lowest MSE.
+
+```{r}
+best_parameter <- get_best_model(cv_models, cv_error)
+best_parameter
+```
+
+### Slide 23
+
+In the following code, we return the coefficients for the elastic net model with the best combination of $\alpha$ and $\lambda$.
+
+```{r }
+glm_ElaNet <- glmnet(train.x, 
+                     train.y, 
+                     alpha = best_parameter$alpha, 
+                     lambda = best_parameter$lambda)
+t(coef(glm_ElaNet))
+```
+
+In the following code, we return the evaluation metrics for the elastic net model on the training data.
+
+```{r }
+fit <- predict(glm_ElaNet, train.x)
+true <- train.y
+summary_ElaNet_train <- eval_results(fit, true)
+summary_ElaNet_train
+```
+
+In the following code, we return the evaluation metrics for the elastic net model on the test data.
+
+```{r}
+fit <- predict(glm_ElaNet, test.x)
+true <- test.y
+summary_ElaNet_test <- eval_results(fit, true)[-5]
+summary_ElaNet_test
+```
+
+### Slide 25
+
+In the following code, we build a baseline MLR model by removing two predictors, `Industry` and `Access_to_highways`.
+
+```{r}
+mlr_adj <- lm(Price ~. -Access_to_highways - Industry, 
+              data = training)
+summary(mlr_adj)
+```
+
+In the following code, we return the evaluation metrics for the baseline MLR model on the training data.
+
+```{r}
+fit <- mlr_adj$fitted.values
+true <- training$Price
+summary_mlr_adj_train <- eval_results(fit, true)
+```
+
+In the following code, we return the evaluation metrics for the baseline MLR model on the test data.
+
+```{r}
+fit <- predict(mlr_adj, newdata = test)
+true <- test$Price
+summary_mlr_adj_test <- eval_results(fit, true)[-5]
+```
+
+### Slide 26
+
+In the following code, we summarise the performances of all models on the training data.
+
+```{r}
+summary_train <- rbind(summary_mlr_adj_train, 
+                       summary_Ridge_train,                   
+                       summary_LASSO_train, 
+                       summary_ElaNet_train)
+
+rownames(summary_train) <- c("MLR_adjusted_train", 
+                             "Ridge_train",                         
+                             "LASSO_train",  
+                             "ElasticNet_train" )
+
+colnames(summary_train)[5] <- "R^2"
+
+knitr::kable(summary_train, digits = 3)
+```
+
+### Slide 27
+
+In the following code, we summarise the performances of all models on the test data.
+
+```{r}
+summary_test <- rbind(summary_mlr_adj_test, 
+                      summary_Ridge_test,                       
+                      summary_LASSO_test, 
+                      summary_ElaNet_test)
+
+rownames(summary_test) <- c("MLR_adjusted_test", 
+                            "Ridge_test",                             
+                            "LASSO_test", 
+                            "ElasticNet_test" )
+
+knitr::kable(summary_test, digits = 3)
+```
+
+### Slide 28
+
+In the following code, we summarise the training MSE and test MSE of all models.
+
+```{r}
+summary <- cbind(summary_train[,1], summary_test[,1])
+colnames(summary) <- c("Train MSE", " Test MSE")
+rownames(summary) <- c("MLR_adjusted Model", 
+                       "Ridge Model",                                    
+                       "LASSO Model", 
+                       "ElasticNet Model" )
+
+knitr::kable(summary, digits = 3)
+```

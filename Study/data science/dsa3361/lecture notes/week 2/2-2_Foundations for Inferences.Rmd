@@ -1,0 +1,70 @@
+---
+title: "DSA3361_RMarkdown_2-2"
+output:
+  pdf_document: default
+  html_document: default
+date: "`r Sys.Date()`"
+---
+```{r, hide = TRUE}
+#install.packages("tinytex")
+library(tinytex)
+```
+
+1. Find the mean and standard deviation of the population, pop, listed as  
+pop <- c(3,5,6,6,8,11,15,15,19,20)  
+Visualize the population using a stripchart().
+
+```{r}
+pop <- c(3,5,6,6,8,11,15,15,19,20)  
+stripchart(pop,
+           pch = 19,
+           method = "stack",
+           at = 0,
+           main = "Population")
+```
+2. Simulate sampling by taking  
+- 5 samples of size 3 without replacement.   
+- 5 samples of size 3 with replacement.   
+- 10000 samples of size 10 without replacement.   
+- 10000 samples of size 10 with replacement.   
+
+```{r}
+set.seed(4224)
+N <- 5
+for (i in 1:N) {
+  s1 <- sample(pop, size = 3, replace = TRUE)
+  print(s1)
+}
+```
+3. Simulate the sampling distribution X-bar, by taking 10000 samples of size 4
+- Use a histogram to plot your results.  
+- Compute the mean and standard error of the sampling distribution.   
+- Compare those values to the population mean and standard deviation.  
+
+```{r}
+set.seed(4224)
+N <- 1e4
+samples_mean_rep <- numeric(N)
+for (i in 1:N) {
+  samples_mean_rep[i] <- mean(sample(pop, size = 4, replace = TRUE))
+}
+hist(samples_mean_rep, main = "Sample mean distribution with rep", col = "green")
+
+samples_mean_norep <- numeric(N)
+for (i in 1:N) {
+  samples_mean_norep[i] <- mean(sample(pop, size = 4, replace = FALSE))
+}
+hist(samples_mean_norep, main = "Sample mean distribution w/o rep", col = "blue")
+
+
+```
+
+```{r}
+mean_x_rep <- mean(samples_mean_rep)
+mean_x_norep <- mean(samples_mean_norep)
+mean_pop <- mean(pop)
+print(c(mean_x_rep, mean_x_norep, mean_pop))
+
+print(c(sd(samples_mean_rep), sd(samples_mean_norep), sd(pop) / sqrt(4)))
+
+```

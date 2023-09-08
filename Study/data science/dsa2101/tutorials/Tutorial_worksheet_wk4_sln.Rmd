@@ -1,0 +1,125 @@
+---
+title: "Week 4 Tutorial"
+author: "Enter your name (Matriculation number)"
+output:
+  html_document:
+    df_print: paged
+urlcolor: blue
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE, 
+                      fig.align = "center",  out.width = "80%")
+```
+
+# Question 1. `R` functions
+
+## Q1.1
+
+Create a function named `pass_check` that takes a numeric input argument and returns `pass` if the input is greater than 5, and `fail` if it is equal or smaller than 5.
+
+```{r}
+# Q1.1 pass_check
+pass_check = function(grade) {
+  
+  # Check if the input is numeric
+  # If not, stop the current execution and print an error
+  if(!is.numeric(grade)) {
+    stop("The input is not numeric.")
+  } 
+  
+  if (grade >= 5){
+    print("pass")
+  } else {
+    print("fail")
+  }
+  
+}
+```
+
+## Q1.2 
+
+Create a function named `factor_convert` that automatically coerces all character variables into factors. The function should work with any data frame regardless of its dimension, the number, the name, or the position of character variable(s).
+
+```{r}
+factor_convert = function(df) {
+  
+  for(i in 1:ncol(df)) {
+    
+    var = df[, i]
+    
+    if(is.character(var)) {
+      df[, i] = as.factor(var)
+    }
+  }
+  
+  return(df)
+  
+}
+```
+
+# Question 2 Working with dates
+
+## Q2.1
+
+Download the file `Shanghai.csv` from Canvas. Read it into `R` and name the object as `df`. Then display the first *three* rows of the data frame.
+
+```{r}
+# Read data set into R
+library(lubridate)
+df = read.csv("../data/Shanghai.csv", header = TRUE)
+head(df, 3)
+```
+
+
+## Q2.2
+
+The data frame has information on date split across two columns: `Year` and `Month`. They are both stored as integers. Combine them into a string that follows a `Year-Month` format and name it as `Date`.
+
+```{r}
+# Q2.2
+df$Date = paste(df$Year, df$Month, sep = "-")
+```
+
+## Q2.3
+
+Use the `lubridate` functions to convert the character string into a `Date` type variable.
+
+```{r}
+# Q2.3
+# lubridate does not have functions to convert just the Year-Month strings. 
+# We will need to assign an artificial day of the month 
+# (say, the first day of the month) to the Year-Month string.
+# Then we can use ymd() to convert the data type.
+df$Date = ymd(paste(df$Year, df$Month, "01", sep = "-"))
+head(df, 5)
+```
+
+## Q2.4
+
+Recreate, as much as you can, the graph below using base `R` syntax.
+
+```{r}
+# Q2.4
+# Extract observations in 2012
+df_2012 = df[df$Year == 2012, ]
+
+# Temperature in 2012 across months
+plot(df_2012$Temp ~ df_2012$Date, type = "b", pch = 19,
+     xlab = "Month", ylab = "Temperature", 
+     main = "Monthly temperature in Shanghai 2012")
+```
+
+**Requirements:**
+
+Your code should generate the following:
+
++ A function named `pass_check`
+
++ A function named `factor_convert`
+
++ A data frame named `df`
+
++ A graph similar to above.
+
+**Reminder: From next tutorial onwards, your code must be in a single `Rmd` file, and must generate the required objects.**

@@ -1,0 +1,86 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Tutorial 1 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+\begin{document}
+\maketitle
+% question 1
+\section{Rock-paper-scissors} 
+There's no pure strategy Nash Equilibrium. Mixed strategy Nash Equilibrium is: $\sigma = \left\{ \left\{ \frac{1}{3},\frac{1}{3},\frac{1}{3}\right\}, \left\{\frac{1}{3},\frac{1}{3},\frac{1}{3}\right\}  \right\}$
+
+% question 2
+\section{$2\times 2$ games}
+\begin{enumerate}
+  \item Example payoffs: $(a,b,c,d,\alpha,\beta,\gamma,\delta) = (0,1,1,0,1,0,0,1) $ \\
+    required conditions for no pure strategy equilibrium:
+      \begin{align*}
+        (a-c)(b-d) < 0 && (\alpha - \gamma)(\beta - \delta) < 0 && (\alpha-\beta)(d-b) < 0
+      \end{align*}
+  \item Player strategies: $\sigma_1 = \{p,1-p\}, \sigma_2 = \{ q, 1-q \}$ such that:
+  \begin{align*}
+    p &= \frac{d-b}{a-b-c+d} \\
+    q &= \frac{\delta - \beta}{\alpha-\beta-\gamma+\delta }
+  \end{align*}
+\item Mixed strategy Nash Equilibrium always exists unless $a+d = c+d$ or $\alpha + \delta = \gamma + \delta$, in which case the condition ($(a-c)(b-d) < 0$ or $(\alpha - \gamma)(\beta - \delta) < 0$) is violated, and the game would have pure strategy Nash Equilibrium.
+\end{enumerate}
+
+% question 3
+\section{Strategy of the commons}
+\begin{enumerate}
+  \item Game specification:
+  \begin{itemize}
+    \item Set of player $N = \{1,2,\dots,16\}$
+    \item Each player $i$ has a set of strategy $S_i = \{L1, L2\}$ whether to fish in lake 1 or lake 2.
+    \item Utility function for each player $u_i$ is the number of fish can catch, given a strategy profile $s$.
+  \end{itemize}
+\item The Nash Equilibrium is $(L_1,L_2) = (8,8) \text{ and } (7, 9)$. Total number of fishes caught is $64$ or $67.5$.
+  \item The maximising number of fishermen on lake 1 is $L_1 = 4$, with the total of $72$ fishes.
+  \item Optimal permit cost is one that mame income one makes on lake 2 balances to that of lake 1, when desired strategy profile is played.
+  \begin{align*}
+    f_1'(4) = f_1(4) - P &= f_2(12) (or +0.5)\\
+    8 - \frac{4}{2} - P &= 4 (or 4.5)\\
+    P &= 2 (or 1.5) \\
+    P &\in [1.5, 2]
+  \end{align*}
+\end{enumerate}
+
+% question 4
+\section{Beauty contest}
+\textit{This is the older version of the question, the new version has} $A = \frac{1}{3n}\sum_{i \in N}s_i$
+\[
+  A = \frac{2}{3n}\sum_{i \in N}s_i
+\]
+\begin{enumerate}
+  \item In $s^0$, if anyone chooses any other number, they will be further than the goal than the rest. So no one wants to divert from this strategy.
+  \item Let $a<b$ be the minimum and maximum number chosen by the participants. If $A \neq \frac{a+b}{2}$, there's some participants farther from $A$ than the others, and they can improve their earning by choosing the same number as the closest person. Since each person has roughly 1\% impact on $A$, their decision will not affect the result very much. Therefore, $A = \frac{a+b}{2}$ for a strategy profile to be pure-strategy Nash equilibrium, and everyone must either choose $a$ or $b$. \\
+  But with $A = \frac{a+b}{2}$, either side can switch side and make the result slightly tilt to their side, and make more money as less people are winning. \\
+  Therefore, it is required that $a=b$ to reach Nash Equilibrium. But with $a = b > 1$, choosing a number one unit lower will alway earn you more money. \\
+  $\Rightarrow$ The only pure-strategy Nash Equilibrium are $s^0$ and $s^1$.
+
+\end{enumerate}
+
+  % question 5
+\section{Mixed-strategy equilibrium}
+  Supposed $u_i(s_i) = u_i(s'_i)$ with all $s_i, s'_i \in S_i$. Then:
+\[
+  u_i(\sigma_i, \sigma_{-i}) = u_i(\sigma'_i, \sigma_{-i}) = u_i(s_i)
+\]
+  with all $\sigma_i, \sigma'_i \in \Sigma_i$ and $s_i \in S_i$. Therefore:
+  \[
+    \exists ! \sigma'_i, u_i(\sigma'_i, \sigma_{-i}) > u_i(\sigma)
+  \]
+  Then:
+  \[
+    u_i(\sigma'_i, \sigma_{-i}) > u_i(\sigma) \Rightarrow \exists s_i, s'_i \in S_i, u_i(s_i) \neq u_i(s'_i)
+  \]
+  Let $s_i = \arg \max_{s_i \in S_i} u_i(s_i)$:
+  \[
+    u_i(s_i) = \max_{\sigma_i \in \Sigma_i} u_i(\sigma_i, \sigma_{-i}) \ge u_i(\sigma'_i, \sigma_{-i}) > u_i(\sigma) \hfill\blacksquare
+  \]
+
+\end{document}

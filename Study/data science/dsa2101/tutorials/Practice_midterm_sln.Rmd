@@ -1,0 +1,331 @@
+---
+title: "Suggested solutions for the sample questions"
+author: "Enter your name (Matriculation number)"
+output:
+  html_document:
+    df_print: paged
+urlcolor: blue
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE, 
+                      fig.align = "center",  out.width = "80%")
+library(tidyverse)
+library(readxl)
+library(stringr)
+library(lubridate)
+```
+
+# Question 1
+
+## Question 1.1
+
+Tidy data refers to a standard way of mapping the meaning of a data set to its structure. The file contains data on various HIV indicators for different countries across the time period from 2010 to 2021. The unit of observation should be a country in a year. The tidy data table should contain five columns: `year`, `sex`, `country`, `incident_rate`, `death_rate`.
+
+## Question 1.2
+
+```{r}
+# Read in the correct range of data
+unicef_hiv = read_excel("../data/UNICEF_hiv_data.xlsx", sheet = "Unicef data", range = "A1:O219") %>%
+  rename("country" = "Time period") %>%
+  filter(!row_number() %in% c(1, 2), 
+         # Remove regions
+         !country %in% c("UNICEF reporting regions - Global", 
+                         "Central African Republic", "Middle East and North Africa",
+                         "Eastern and Southern Africa", 
+                         "Sub-Saharan Africa", "West and Central Africa", 
+                         "East Asia and Pacific", "South Asia", 
+                         "Latin America and Caribbean"))
+
+# Reshape with gather and spread
+unicef_hiv_tidy = unicef_hiv %>%
+  gather(`2021`:`2010`, key = "year", value = "estimates") %>%
+  # Convert the estimates into numeric
+  mutate(estimates = case_when(estimates == "<0.01" | estimates == "-" ~ NA_character_,
+                               TRUE ~ estimates),
+         estimates = as.numeric(estimates),
+         year = as.numeric(year)) %>%
+  # Reshape the data: spread out different indicators
+  mutate(indicator = case_when(str_detect(indicator, "deaths") ~ "death_rate",
+                               str_detect(indicator, "infection") ~ "incidence_rate")) %>%
+  spread(key = indicator, value = estimates)
+
+# Alternatively, we can reshape with the pivoting functions
+unicef_hiv_tidy1 = unicef_hiv %>%
+  pivot_longer(`2021`:`2010`, names_to = "year", values_to = "estimates") %>%
+  # Convert the estimates into numeric
+  mutate(estimates = case_when(estimates == "<0.01" | estimates == "-" ~ NA_character_,
+                               TRUE ~ estimates),
+         estimates = as.numeric(estimates),
+         year = as.numeric(year)) %>%
+  # Reshape the data: spread out different indicators
+  mutate(indicator = case_when(str_detect(indicator, "deaths") ~ "death_rate",
+                               str_detect(indicator, "infection") ~ "incidence_rate")) %>%
+  pivot_wider(names_from = indicator, values_from = estimates)
+```
+
+## Question 1.3
+
+```{r}
+unicef_hiv_tidy2 = unicef_hiv_tidy %>%
+  group_by(year) %>%
+  summarize(avg_rate = mean(incidence_rate, na.rm = TRUE))
+
+plot(unicef_hiv_tidy2$avg_rate ~ unicef_hiv_tidy2$year, type = "b", pch = 16,
+     xlab = "Year", ylab = "Incidence rate",
+     main = "Global evolution of the HIV incidence rate in children aged 0-14")
+```
+
+## Question 1.4
+
+```{r}
+# Read in additional data
+df_region = read.csv("../data/iso_unicef_region.csv")
+
+unicef_hiv_tidy3 = unicef_hiv_tidy %>%
+  # Use inner_join to ignore all unmatched cases
+  inner_join(df_region, by = c("country" = "Country.Region")) %>%
+  group_by(year) %>%
+  mutate(global_avg = mean(incidence_rate, na.rm = TRUE))  %>%
+  group_by(UNICEF.Region, year) %>%
+  summarize(rates = mean(incidence_rate, na.rm = TRUE),
+            global_avg = mean(global_avg), .groups = "drop") %>%
+  filter(UNICEF.Region == "Eastern and Southern Africa") 
+
+plot(unicef_hiv_tidy3$rates ~ unicef_hiv_tidy3$year, 
+     type = "b", pch = 16, col = "indianred4", ylim = c(0.5, 3.5),
+     xlab = "Year", ylab = "Incidence rate",
+     main = "HIV incidence rate in children aged 0-14")
+lines(unicef_hiv_tidy3$global_avg ~ unicef_hiv_tidy3$year, 
+      type = "b", pch = 16, col = "gray")
+legend("topright", cex = 0.8, pch = 16, col = c("indianred4", "gray"),
+       legend = c("Eastern and Southern Africa", "Global average"))
+```
+
+# Question 2
+
+Download the data from Kaggle, unzip the file, and save the data sets in the `data` folder. 
+
+Use our usual relative path to read in the data:
+
+```{r}
+themes = read.csv("../data/themes.csv") 
+sets = read.csv("../data/sets.csv")
+parts = read.csv("../data/parts.csv") 
+part_categories = read.csv("../data/part_categories.csv") 
+inventory_parts = read.csv("../data/inventory_parts.csv")
+inventory_sets = read.csv("../data/inventory_sets.csv") 
+inventories = read.csv("../data/inventories.csv") 
+colors = read.csv("../data/colors.csv") 
+```
+
+## Question 2.1
+
+There are 39 such themes.
+
+```{r}
+anti_join(themes, sets, by = c("id" = "theme_id")) %>%
+  rename("theme_name" = "name") %>% nrow
+```
+
+## Question 2.2
+
+Make sure you name the new table, and the columns in the table, as required.
+
+```{r}
+brick_parts = left_join(parts, part_categories, by = c("part_cat_id" = "id")) %>%
+  # select LEGO part of which the part category contain the word "Bricks"
+  filter(str_detect(name.y, "Bricks")) %>%
+  # rename the columns
+  rename(part_category_name = name.y, 
+         part_name = name.x)
+
+part_colors = left_join(inventory_parts, colors, by = c("color_id" = "id")) %>% 
+  select(part_num, name, rgb)
+
+brick_parts = left_join(brick_parts, part_colors, by = "part_num") %>% 
+  select(part_num, part_name, part_category_name, name, rgb) %>% 
+  rename(color_name = name)
+
+brick_parts %>% head(5)
+```
+
+## Question 2.3
+
+```{r}
+pop_themes = themes %>%
+  filter(str_detect(name, "Star Wars")) %>%
+  left_join(sets, by = c("id" = "theme_id")) %>%
+  # remove an unmatched case
+  filter(!is.na(year)) %>%
+  group_by(year) %>%
+  summarize(num_sets = n(),
+            avg_num_parts = round(mean(num_parts), 0))
+
+pop_themes %>% head(5)
+```
+
+## Question 2.4
+
+```{r}
+# A left join
+left_join(sets, inventories)
+
+# Check uniqueness
+sets %>% count(set_num, sort = TRUE) %>%
+  filter(n > 1)
+
+inventories %>% count(set_num, sort = TRUE) %>%
+  filter(n > 1)
+
+# Examine the duplicates
+inventories %>%
+  filter(set_num == "11905-1")
+```
+
+Originally, the sets table has 11673 observations. After a left join, there are 11684 observations in the resulting table.
+
+The sets table and the inventories table are merged by `set_num`. We find that the `set_num` in the sets table are unique, but there are 8 items with duplicated `set_num` in the inventories table.
+
+So the increase is due to these duplicated set numbers in the inventories table.
+
+## Question 1.5 Data exploration
+
+*Here are some prompts to help frame your discussion:*
+    
++ How would you answer the question with this data? What summary statistics and visualization helped you answer this question?
+
++ Create a visualization from this data which confirms something you thought would be true. Why did you expect to see this?
+
++ Create a visualization from this data that you did not expect to see, or were surprised to see. Why was this surprising? 
+
+**Some possible ideas (you only need to provide one exploration):**
+
++ Over the years, what is the trend in the number of parts per set?
+
+    The average number of parts per set is increasing over the period from 1950 to 2017. There was a shape increase in 1960, but it did not affect the overall trend. We also notice that there were slight dips around 1997 and 2008.
+    
+    There is an interesting disparity between the mean and median pieces per set. The mean is growing across the years, but the median pieces per set remains fairly constant over time. It is likely that the mean is driven by a few large sets, while the majority of LEGO sets remain to be small.
+
+```{r}
+df1 = sets %>% select(year, num_parts) %>%
+  group_by(year) %>%
+  summarize(avg_num_parts = mean(num_parts, na.rm = TRUE),
+            med_num_parts = median(num_parts, na.rm = TRUE))
+
+plot(df1$avg_num_parts ~ df1$year, type = "l", lwd = 2, col = "indianred4",
+     main = "Size of LEGO sets across the year", 
+     xlab = "Year", ylab = "Average size")
+lines(df1$med_num_parts ~ df1$year, type = "l", lwd = 2, lty = 2, col = "grey")
+legend("topleft", cex = 0.8, lty = c(1, 2), lwd = 2,
+       legend = c("Mean pieces per set", "Median pieces per set"),
+       col = c("indianred4", "grey"))
+```
+
++ What kinds of sets have the most number of pieces?
+
+```{r}
+df3 = sets %>%
+  inner_join(themes, by = c("theme_id" = "id")) %>%
+  rename(set_name = name.x,
+         theme_name = name.y) %>%
+  select(set_num, num_parts, ends_with("name"), year)
+
+# sort by the number of pieces in each set
+df3 %>% arrange(desc(num_parts))
+
+# sort by the avg number of pieces per theme
+df3 %>% group_by(theme_name) %>%
+  summarize(avg_num_parts = mean(num_parts),
+            count_sets = n()) %>%
+  arrange(desc(avg_num_parts))
+
+# look into the sets from the Star Wars theme by year
+df4 = df3 %>% 
+  filter(str_detect(theme_name, "Star Wars")) %>%
+  arrange(desc(num_parts)) %>%
+  group_by(year) %>%
+  summarize(mean_num_parts = mean(num_parts))
+
+plot(df4$mean_num_parts ~ df4$year, type = "b", pch = 16,
+     main = "Average pieces in Star Wars sets over the years", 
+     xlab = "Year", ylab = "")
+```
+
++ What are the most common color for a LEGO piece?
+
+```{r}
+top_colors = inventory_parts %>%
+  left_join(colors, by = c("color_id" = "id")) %>%
+  rename(color_name = name) %>%
+  filter(!color_name %in% c("Unknown", "[No Color]"), !is.na(color_name)) %>%
+  select(part_num, color_name, rgb) %>%
+  distinct() %>%
+  group_by(color_name, rgb) %>%
+  mutate(rgb = paste0("#", str_trim(rgb))) %>%
+  count() %>%
+  arrange(desc(n)) 
+
+top_10_colors = top_colors %>% head(n = 10)
+
+barplot(top_10_colors$n, names.arg = top_10_colors$color_name,
+        col = top_10_colors$rgb,
+        cex.names = 0.6, cex.axis = 0.6, las = 2)
+```
+
+The following plot is generated in `ggplot`, which is **not** required in the midterm.
+
+```{r}
+# Top colors by decades
+top_colors_by_decades = inventory_parts %>%
+  left_join(colors, by = c("color_id" = "id")) %>%
+  rename(color_name = name) %>%
+  filter(!color_name %in% c("Unknown", "[No Color]"), !is.na(color_name)) %>%
+  left_join(inventories, by = c("inventory_id" = "id")) %>%
+  left_join(sets, by = "set_num") %>%
+  mutate(decade = floor(year/10)*10) %>%
+  select(part_num, color_name, rgb, decade) %>%
+  distinct() %>%
+  group_by(color_name, rgb, decade) %>%
+  mutate(rgb = paste0("#", str_trim(rgb))) %>%
+  count() %>%
+  arrange(desc(n)) 
+
+# Select top rows by group
+top_10_colors_decades = top_colors_by_decades %>% 
+  group_by(decade) %>% 
+  top_n(n = 8, wt = n) 
+
+color_pattern = c("Black" = "#05131D", "Blue" = "#0055BF",
+                  "Green" = "#237841", "Light Bluish Gray" = "#A0A5A9",
+                  "Light Gray" = "#9BA19D", "Red" = "#C91A09",
+                  "White" = "#FFFFFF", "Yellow" = "#F2CD37",
+                  "Brown" = "#583927", "Dark Bluish Gray" = "#6C6E68",
+                  "Dark Gray" = "#6D6E5C", "Reddish Brown" = "#582A12",
+                  "Royal Blue" = "#4C61DB", "Trans-Clear" = "#FCFCFC")
+
+ggplot(data = top_10_colors_decades, aes(y = n, x = decade, fill = color_name)) +
+  geom_bar(position = "fill", stat = "identity") +
+  scale_fill_manual(values = color_pattern) +
+  labs(title = "Lego bricks are getting darker", x = "Top eight colors by decade",
+       y = "Percents of pieces")
+```
+
+# Requirements
+
++ Your code must generate the objects required by each question.
+
+    + `unicef_hiv_tidy`, `brick_parts`, `pop_themes`
+
++ Three required plots. You only need to use base `R` plotting. But if you are already comfortable with `ggplot`, you may also go ahead and use it. Remember to include axis labels and necessary legends.
+
++ There must also be two short discussion sections, under `Rmd` text sections entitled "Question 1.1", "Question 2.4", and "Question "2.5", respectively.
+
+
+
+
+
+
+
+
+

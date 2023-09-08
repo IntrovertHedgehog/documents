@@ -1,0 +1,82 @@
+
+    % question 3
+  \item Let $a_i$ and $b_j$ be a row vector and column vector of the same size $n$:
+    \begin{align*}
+      a_i &= \begin{pmatrix}
+        a_{i1} & a_{i2} & \dots & a_{in} 
+      \end{pmatrix} \\
+      b_i &= \begin{pmatrix}
+        b_{1j} \\ b_{2j} \\ \vdots \\ b_{nj}
+      \end{pmatrix} \\
+    \end{align*}
+    We have:
+    \begin{align*}
+      a_i b_j &= 
+      \begin{pmatrix}
+        a_{i1} & a_{i2} & \dots & a_{in}
+      \end{pmatrix}
+      \begin{pmatrix}
+        b_{1j} \\ b_{2j} \\ \vdots \\ b_{nj}
+      \end{pmatrix} \\
+      &= \sum_{1 \le r \le n} a_{ir}b_{rj} \text{ (1) }
+    \end{align*}
+     Let $A$ be a matrix of size $m \times n$, apply (1) to obtain:
+    \begin{align*}
+      Ab_i &= \begin{pmatrix}
+        a_{11} & \dots & a_{1n} \\
+        \vdots & \ddots & \vdots \\
+        a_{m1} & \dots & a_{mn}
+      \end{pmatrix}
+      \begin{pmatrix}
+        b_{1i} \\ b_{2i} \\ \dots \\ b_{ni}
+      \end{pmatrix} \\
+      &= \begin{pmatrix}
+        \sum_{1 \le r \le n} a_{1r}b_{ri} \\
+        \vdots \\
+        \sum_{1 \le r \le n} a_{mr}b_{ri} \\
+      \end{pmatrix}\\
+      &= \begin{pmatrix}
+        a_1 b_i \\
+        \vdots \\
+        a_m b_i
+      \end{pmatrix} \text{ (2)}
+    \end{align*}
+    Let $B$ be a $n \times s$ matrix, apply (2) to obtain:
+    \begin{align*}
+      AB &= \begin{pmatrix}
+        Xb_1 & Xb_2 & \dots & Xb_s
+      \end{pmatrix} \\
+      &= \begin{pmatrix}
+        a_1 b_1 & a_1 b_2 & \dots & a_1 b_s \\
+        a_2 b_1 & \ddots & \quad & \vdots \\
+        \vdots & \quad & \ddots & \vdots  \\
+        a_m b_1 & \dots & \dots & a_m b_s
+      \end{pmatrix} \text{ (3)} \\
+    \end{align*}
+    This applies for every matrices $A, B$ with size $m \times n$ and $n \times s$, respectively. \\
+    With $X, Y$, we have:
+    \begin{align*}
+      XY  
+      &= \begin{pmatrix}
+        a_1 b_1 & a_1 b_2 & \dots & a_1 b_6 \\
+        a_2 b_1 & \ddots & \quad & \vdots \\
+        \vdots & \quad & \ddots & \vdots  \\
+        a_6 b_1 & \dots & \dots & a_6 b_6
+      \end{pmatrix} \\
+      &= \left(\begin{array}{cc|cc|cc}
+        a_1 b_1 & a_1 b_2 & a_1 b_3 & a_1 b_4 & a_1 b_5 & a_1 b_6 \\
+        a_2 b_1 & a_2 b_2 & a_2 b_3 & a_2 b_4 & a_2 b_5 & a_2 b_6 \\
+        \hline
+        a_3 b_1 & a_3 b_2 & a_3 b_3 & a_3 b_4 & a_3 b_5 & a_3 b_6 \\
+        a_4 b_1 & a_4 b_2 & a_4 b_3 & a_4 b_4 & a_4 b_5 & a_4 b_6 \\
+        \hline
+        a_5 b_1 & a_5 b_2 & a_5 b_3 & a_5 b_4 & a_5 b_5 & a_5 b_6 \\
+        a_6 b_1 & a_6 b_2 & a_6 b_3 & a_6 b_4 & a_6 b_5 & a_6 b_6 \\
+      \end{array}
+    \right)
+      &= \begin{pmatrix}
+        C_{11} & C_{12} & C_{13} \\
+        C_{21} & C_{22} & C_{23} \\
+        C_{31} & C_{32} & C_{33} \\
+      \end{pmatrix}
+    \end{align*}

@@ -1,0 +1,8 @@
+GIC CodeToImpact hackathon and/or the JP Morgan Code For Good hackathon?
+
+- opencv
+- tesseract
+- test the
+- recognize ssd
+- map to numbers
+- build planplan

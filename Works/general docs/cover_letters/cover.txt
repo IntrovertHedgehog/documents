@@ -1,0 +1,12 @@
+Dear Hiring Manager,
+I am writing to express my strong interest in the software engineer internship position at Goldman Sachs. As a passionate and dedicated FinTech enthusiast, I am excited about the opportunity to join a company that is at the forefront of digital finance and innovation.
+
+Throughout my studies in information system, I have developed a strong technical foundation in back-end development, especially in the area of blockchain and distributed systems. I am fascinated by the challenges these areas are trying to take on, and the potentials they promise if they succeed. I know this is my passion, and the career I want to pursue. I believe Goldman Sachs, among others, is the right place for me to start.
+
+Throughout my studies in information system, I have developed a strong foundation in backend development, and have experience in technologies such as Spring, Node.js, MongoDB, PostgreSQL among others. I have also acquired knowledge in Blockchain technology such as Solidity smart contract on Ethereum, to create some mobile FinTech application such as Fihand – a peer-to-peer lending & borrowing application. I am confident that my skills and experience make me a strong candidate for this internship.
+
+In addition to my technical skills, I am a fast learner and highly motivated to learn new technologies. I am also a strong team player and have the ability to effectively communicate and collaborate with others. I am excited to contribute my skills and passion to the team at Goldman Sachs and to learn from the talented professionals there.
+
+Thank you for considering my application. I look forward to the opportunity to further discuss my qualifications and how I can contribute to the success of Visa.
+Sincerely,
+Le Van Minh

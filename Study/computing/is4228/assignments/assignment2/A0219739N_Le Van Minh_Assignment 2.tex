@@ -1,0 +1,69 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Assignment 2 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{enumerate}[leftmargin=\labelsep]
+  \item 
+    \begin{tabular}{l|l}
+      \hline
+      \multicolumn{1}{c|}{\textbf{Maturity}} & 
+      \multicolumn{1}{c}{\textbf{YTM}} \\
+      \hline
+      1 & 4.7\% \\
+      2 & 4.8\% \\
+      3 & 5.0\% \\
+      \hline
+    \end{tabular}
+  \item \begin{enumerate}
+    \item 
+      \[
+        1135.9 = \frac{50}{r} \times \left(1 - \frac{1}{(1+r)^{20}} \right) + \frac{1000}{(1+r)^{20}} 
+      \]
+      \begin{align*}
+        r & = 4\% \\
+        YTM = r \times 2 &= 8\%
+      \end{align*}
+      
+    \item 
+      \begin{align*}
+        r & = APR \div 2 = 5\% \\
+        P & = \frac{50}{r} \times \left(1 - \frac{1}{(1+r)^{20}} \right) + \frac{1000}{(1+r)^{20}} \\
+        & = 1000
+      \end{align*}
+  \end{enumerate}
+
+  \item Supposed the bond face value is \$1000, the bond price is:
+    \begin{align*}
+      P &= \frac{50}{1+YTM_1} + \frac{50}{(1+YTM_2)^2} + \frac{1050}{(1+YTM_3)^3} \\
+      &= 1000.3 \\
+      &= \frac{50}{r} \times \left(1 - \frac{1}{(1+r)^{3}} \right) + \frac{1000}{(1+r)^{3}} \\
+    \end{align*}
+    \[
+      r = YTM = 5 \%
+    \]
+
+  \item let $r_i$ be $i$-year risk free interest rate. With the one-year bond $r = YTM \div 2 = 3\%$:
+    \begin{gather*}
+      P = \displaystyle\sum_{i=1}^{2} \frac{4\% \times FV}{(1+3\%)^i} + \frac{FV}{(1+3\%)^2} = \frac{4\% \times FV}{1 + 2\%} + \frac{(4\% + 1) \times FV}{1 + r_1} \\
+      r_1 = 6.1 \%
+    \end{gather*}
+    With the two-year bond $r = 5\%$:
+    \begin{gather*}
+      P = \displaystyle\sum_{i=1}^{2} \frac{10\% \times FV}{(1+5\%)^i} + \frac{FV}{(1+5\%)^2} = \frac{10\% \times FV}{1 + 6.1\%} + \frac{(10\% + 1) \times FV}{1 + r_2} \\
+      r_2 = 10.1 \%
+    \end{gather*}
+
+  \item Suppose the bond promise to pay \$100 upon maturity, the expected return is $E(income) = 0.6 \times 100 + 0.4 \times 20 = 68$. With 10\% risk premium $r = 2\% + 10\% = 12\%$:
+    \begin{gather*}
+      P = \frac{68}{1 + 12\%} = 60.71 \\
+      YTM = \frac{FV}{P} - 1 = 64.7 \%
+    \end{gather*}
+\end{enumerate}
+\end{document}

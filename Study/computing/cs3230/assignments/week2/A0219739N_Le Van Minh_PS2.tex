@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+
+\title{Problem Set 1 - Submission}
+\author{A0219739N - Le Van Minh}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{enumerate}[leftmargin=\labelsep]
+  % question 1
+  \item \begin{enumerate}
+    \item Since $f(n) = O(g(n))$ and $g(n) = O(h(n))$, there are $c_1, c_2, n_1, n_2$ such that:
+      \begin{gather*}
+        f(n) \le c_1 g(n) ,\  \forall n \ge n_1 \\
+        g(n) \le c_2 h(n) ,\  \forall n \ge n_2 \\
+        \Rightarrow f(n) \le c_1 c_2 h(n) ,\  \forall n \ge \max \{n_1, n_2\} \\
+        \Rightarrow f(n) = O(h(n)) \hfill \blacksquare
+      \end{gather*}
+
+    \item Supposed $f(n) = \Theta (g(n))$:
+      \begin{gather*}
+        f(n) = O(g(n)) \Rightarrow \exists c_1, n_1 \in N \text{ such that } f(n) \le c_1 g(n),\ \forall n \ge n_1 \\
+        \Rightarrow g(n) \ge \frac{1}{c_1} f(n),\ \forall n \ge n_1 \Rightarrow g(n) = \Omega(f(n)) \\
+        f(n) = \Omega(g(n)) \Rightarrow \exists c_2, n_2 \in N \text{ such that } f(n) \ge c_2 g(n),\ \forall n \ge n_2 \\
+        \Rightarrow g(n) \le \frac{1}{c_2} f(n),\ \forall n \ge n_2 \Rightarrow g(n) = O(f(n)) \\
+      \end{gather*}
+    Therefore 
+      \[
+        g(n) = \Theta(f(n)) \blacksquare
+      \]
+  \end{enumerate}
+  
+  % question 2
+  \item \begin{enumerate}
+      \item $f_4(n) \le f_6(n) \le f_2(n) \le f_8(n) \le f_7(n) \le f_5(n) \le f_1(n) \le f_3(n)$
+      \item \begin{enumerate}
+        \item \begin{gather*}
+            f_6(n) = 2^{\lg \lg n} = (\lg n)^{\lg 2} < (\lg n)^{0.31} = O(\lg n) \\
+            f_7(n) = 3230n - \lg \lg n = \Theta(n) \\
+            \Rightarrow f_6(n) = O(f_7(n))
+        \end{gather*}
+      \item
+        \[
+          f_5(n) = n^2 \log_n n! = n^2 (\log_n n + \log_n (n_1) + \dots + log_n 1) 
+        \]
+         \begin{align*}
+            \log_n n & = 1 \\
+            \log_n (n-1) & < 1 \\
+            & \dots \\
+            log_n 1 = 0 & < 1 \\
+            \Rightarrow f_5(n) & < n^3 \\
+            \Rightarrow f_5(n) & < n^3 + 3n + sin(n) \\
+            \Rightarrow f_5(n) &= O(f_1(n)) \\
+        \end{align*} 
+      \end{enumerate}
+  \end{enumerate}
+
+    %question 3
+  \item\ \\
+    \textbf{Algorithm by Alice}
+    \begin{enumerate}
+      \item Initialization takes $O(n)$ time
+      \item Computing distance between $n$ points and $P$ with $n$ calls to $findDist$ takes $nO(n^2) = O(n^3)$ time
+      \item $\log n$ iterations of scanning an $n$-sized array takes $O(n\log n)$ time
+    \end{enumerate}
+    This algorithm takes $O(n + n^3 + n\log n) = O(n^3)$ time in total
+
+    \textbf{Algorithm by Bob}
+    \begin{enumerate}
+      \item $O(n)$ for initialization
+      \item $\log n$ iterations, calling $findDist$ $n$ times each iteration takes $O(\log n \times n^2 \times n) = O(n^3 \log n)$
+    \end{enumerate}
+    This algorithm runs in $O(n + n^3 \log n) = O(n^3 \log n)$ time
+
+    \textbf{Faster algorithm}\\
+    Both algorithms are similar in the initialization step and iterating through the points to find the closest one is the same between Alice and Bob. However, Bob recalculates the distance every time he iterates through it, which makes each iteration $0(n^2)$ time slower than Alice's.
+\end{enumerate}
+\end{document}

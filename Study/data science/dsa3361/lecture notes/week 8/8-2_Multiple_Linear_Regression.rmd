@@ -1,0 +1,291 @@
+---
+title: "8-2 Multiple Linear Regression using R"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **8-2 Multiple Linear Regression**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will work with the `Advertising2` data set. Before proceeding, place the data set `Advertising2.csv` in the `data` folder. This R markdown file itself, `8-2_Multiple_Linear_Regression.rmd`, should be placed in `src` folder.
+
+## Load packages
+
+We load the packages using the `library()` function. Ensure that the packages are installed before doing this.
+
+```{r include = FALSE}
+library(tidyverse) # for data manipulations and visualisations
+library(ggpubr) # for correlation coefficient on plot
+library(gridExtra) # for arranging plots 
+library(e1071) # for skewness 
+```
+
+## Slide 11
+
+The data is in the CSV (comma separated values) format. We will continue to use the `read.csv()` function to read in the data. The `read.csv()` function returns the dataset in the form of a data frame, and is stored in the variable `df.advert`. As before, we view the top few rows in `df.advert` using the `head()` function. 
+
+Note that the advertising dataset still has the `Sales.Revenue` variable, but the `Advertising.Revenue` is now split into individual advertising channels, `TV`, `Radio` and `Newspaper`.  
+
+```{r, message = FALSE}
+df.advert <- read.csv("../data/Advertising2.csv")
+head(df.advert)
+```
+
+## Slide 12
+
+Check for missing data and duplicates. Note the number of rows. 
+```{r}
+sum(is.na(df.advert))
+sum(duplicated(df.advert))
+nrow(df.advert)
+```
+
+## Slide 13
+
+We will now check the distribution of each variable in the dataset. As before, we can plot a histogram and box plot to visualise distribution of `Sales.Revenue`, and compute the skewness of the distribution using `skewness()` function. 
+```{r}
+p.hist.Revenue <-
+  ggplot(data = df.advert, mapping = aes(x = Sales.Revenue)) +
+  geom_histogram() +
+  labs(y = "Number of Cities",
+       x = "Sales Revenue",
+       title = "Distribution of Sales Revenue Across 200 Different Cities")
+p.hist.Revenue
+
+p.boxplot.Revenue <-
+  ggplot(data = df.advert, aes(x = Sales.Revenue)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  labs(x = "Sales Revenue") +
+  theme(axis.text.y = element_blank())
+p.boxplot.Revenue
+
+skewness(df.advert$Sales.Revenue)
+```
+
+## Slide 14 
+
+Check the distributions of the predictor variables: `TV`, `Radio` and `Newspaper`. Note that the only change in these codes are the variables. 
+```{r}
+p.hist.tv <- 
+  ggplot(data = df.advert, mapping = aes(x = TV)) +
+  geom_histogram() +
+  labs(y = "Number of Cities",
+       title = "Distribution of TV Advertising Expenditure Across 200 Different Cities")
+p.hist.tv
+
+p.boxplot.tv <- 
+  ggplot(data = df.advert, mapping = aes(x = TV)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  theme(axis.text.y = element_blank())
+p.boxplot.tv
+
+skewness(df.advert$TV)
+
+p.hist.radio <- 
+  ggplot(data = df.advert, mapping = aes(x = Radio)) +
+  geom_histogram() +
+  labs(y = "Number of Cities",
+       title = "Distribution of TV Advertising Expenditure Across 200 Different Cities")
+p.hist.radio
+
+p.boxplot.radio <- 
+  ggplot(data = df.advert, mapping = aes(x = Radio)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  theme(axis.text.y = element_blank())
+p.boxplot.radio
+
+skewness(df.advert$Radio)
+
+p.hist.paper <- 
+  ggplot(data = df.advert, mapping = aes(x = Newspaper)) +
+  geom_histogram() +
+  labs(y = "Number of Cities",
+       title = "Distribution of TV Advertising Expenditure Across 200 Different Cities")
+p.hist.paper
+
+p.boxplot.paper <- 
+  ggplot(data = df.advert, mapping = aes(x = Newspaper)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() +
+  theme(axis.text.y = element_blank())
+p.boxplot.paper
+
+skewness(df.advert$Newspaper)
+
+```
+
+## Slide 16 
+
+We now need to check if the relationship between each predictor variable X and the response variable Y is linear. We will plot a scatter plot for each X-Y combination to check this. As before, we use the `geom_smooth()` function with the `method` set to "lm" to display the regression line for each scatter plot. 
+
+Let us also add the correlation coefficient on the scatter plot. This can be done with the `stat_cor()` function in the library `ggpubr`. The `method` parameter is set to "pearson", to compute the Pearson's correlation coefficient. We also specify the `mapping` parameter to display the computed correlation coefficient. We use `..r..` inside the `paste()` function, to show the correlation coefficient as a label on the plot. Let's plot the scatter plot for `Sales.Revenue` vs `TV`.  
+
+```{r}
+# Sales.Revenue vs TV
+p.scatter.slr1 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = TV)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "pearson", mapping = aes(label = paste("r", ..r.., sep = "~`=`~")))
+p.scatter.slr1
+```
+
+Similarly, now we plot the scatter plots for `Sales.Revenue` vs `Radio`, and `Sales.Revenue` vs `Newspaper`.
+
+```{r}
+# Sales.Revenue vs Radio
+p.scatter.slr2 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = Radio)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "pearson", mapping = aes(label = paste("r", ..r.., sep = "~`=`~")))
+p.scatter.slr2
+
+# Sales.Revenue vs Newspaper
+p.scatter.slr3 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = Newspaper)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_cor(method = "pearson", mapping = aes(label = paste("r", ..r.., sep = "~`=`~")))
+p.scatter.slr3
+```
+
+To compare the plots with each other, we can display them side by side with the `grid.arrange()` function in `gridExtra` package. 
+```{r}
+grid.arrange(p.scatter.slr1, p.scatter.slr2, p.scatter.slr3, nrow=1) 
+```
+
+## Slide 18
+
+Show the X-Y scatter plots side-by-side again. 
+```{r}
+grid.arrange(p.scatter.slr1, p.scatter.slr2, p.scatter.slr3, nrow=1) 
+```
+
+## Slide 19 
+To check for the possibility of multicollinearity we need to compute the correlation coefficient of each pair of predictor variables. To do this, we will use `cor()` function again. But this time, we can specify all the predictor variables at once. We do this by referencing the columns associated with the predictor variables in the dataset, `df.advert`. 
+
+We can use the `names` function to see the column names in order. 
+
+```{r}
+names(df.advert)
+```
+
+Note that we can access a specific column `j` in `df.advert` in this format: `df.advert[,i]`. The predictor variables as shown above, are `TV`, `Radio` and `Newspaper` and they have column numbers 1, 2, and 3. We can specify this as a range in R as `1:3`. We provide these predictor variables as input to the `cor()` function.
+
+```{r}
+correlation <- cor(df.advert[,1:3])
+correlation
+```
+
+## Slide 21
+
+We will now randomly split the data into train and test datasets, using the same code as before. 
+```{r}
+set.seed(10)
+index <- sort(sample(x = nrow(df.advert), size = nrow(df.advert)*.8))
+train <- df.advert[index, ]
+test <- df.advert[-index, ]
+```
+
+## Slide 22
+
+Let us now fit a multiple linear regression model to our dataset, using the `lm()` function. Note how the formula for multiple predictors is shown here, using the `+` sign to add predictors. The model output is stored in `lm1`.
+
+```{r}
+lm1 <- lm(formula = Sales.Revenue ~ TV + Radio + Newspaper,
+          data = train)
+```
+
+## Slide 23-24, 28-31
+
+We now consider the model summary. This is generated using the `summary()` function.
+
+```{r}
+summary(lm1)
+```
+
+## Slide 32, 33
+
+Here, we fit a model without the variable, `Newspaper`. 
+```{r}
+lm2 <- lm(formula = Sales.Revenue ~ TV + Radio,
+          data = train)
+summary(lm2)
+```
+
+## Slide 34
+
+To check that the residuals are normally distributed, we can plot the histogram of standardised residuals, as before. To compute standardised residuals, we will use the `rstandard()` function, in place of the `resid()` function that computes raw residuals. 
+
+Note that we don't specify the `data` in the `ggplot()` function, instead, we only specify the `mapping` parameter. Since we need a histogram of the standardised residuals for the model, `lm2` the `rstandard()` is  used, and the computed residuals are assigned to the `x` aesthetic in the `aes()` function.
+
+```{r}
+ggplot(mapping = aes(x = rstandard(lm2))) +
+  geom_histogram() +
+  labs(x = "Standardised Residuals",
+       y = "Number of Cities",
+       title = "Histogram of Residuals for Advertising Expenditure")
+```
+
+## Slide 35 
+
+To check that the residuals are evenly scattered, we generate the scatter plot of the residuals vs. the predicted sales revenue. 
+
+```{r}
+ggplot(mapping = aes(x = fitted(lm2), y = rstandard(lm2))) +
+  geom_point() +
+  geom_abline(slope = 0,
+              size = 0.5,
+              colour = "red") +
+  labs(x = "Fitted Values",
+       y = "Standardised Residuals",
+       title = "Residual plot for Advertising Expenditure")
+
+```
+
+## Slide 37 
+
+The `predict()` function is used to make predictions using the fitted model. Let us use the model, `lm2` to predict the sales revenue, when the advertising expenditure on TV is 150 and Radio is 30. We provide this as input in the form of a new data frame that contains the predictor, `TV` and `Radio`, to the `newdata` parameter in the `predict()` function. The `interval` parameter is assigned to "confidence" for computing the confidence interval for the prediction, and "prediction" for computing the prediction interval. 
+
+```{r}
+newdata <- data.frame(TV = 150, Radio = 30)
+predict (lm2, newdata = newdata, interval = "confidence")
+predict (lm2, newdata = newdata, interval = "prediction")
+```
+
+## Slide 38-39 
+
+We reuse the user defined function, `eval.metrics.linreg()` to compute the evaluations metrics for the multiple linear regression model, `lm2`, for the `train` and `test` data respectively. 
+
+```{r}
+eval.metrics.linreg <- function(actual, predicted) {
+  residual <- actual - predicted
+  mse <- mean(residual ^ 2)
+  mae <- mean(abs(residual))
+  rmse <-  sqrt(mse)
+  mape <- mean(abs(residual / actual)) * 100
+  
+  data.frame(
+    MSE = mse,
+    MAE = mae,
+    RMSE = rmse,
+    MAPE = mape
+  )
+}
+
+# Evaluation metrics for train data 
+actual <- train$Sales.Revenue
+predicted <- predict(lm2, newdata = train)
+eval.metrics.linreg(actual, predicted)
+
+# Evaluation metrics for test data 
+actual <- test$Sales.Revenue
+predicted <- predict(lm2, newdata = test)
+eval.metrics.linreg(actual, predicted)
+```
+

@@ -1,0 +1,110 @@
+➜  Jarvis git:(minh) ✗ npx react-native start
+
+                        ▒▒▓▓▓▓▒▒
+                     ▒▓▓▓▒▒░░▒▒▓▓▓▒
+                  ▒▓▓▓▓░░░▒▒▒▒░░░▓▓▓▓▒
+                 ▓▓▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▓▓
+                 ▓▓░░░░░▒▓▓▓▓▓▓▒░░░░░▓▓
+                 ▓▓░░▓▓▒░░░▒▒░░░▒▓▒░░▓▓
+                 ▓▓░░▓▓▓▓▓▒▒▒▒▓▓▓▓▒░░▓▓
+                 ▓▓░░▓▓▓▓▓▓▓▓▓▓▓▓▓▒░░▓▓
+                 ▓▓▒░░▒▒▓▓▓▓▓▓▓▓▒░░░▒▓▓
+                  ▒▓▓▓▒░░░▒▓▓▒░░░▒▓▓▓▒
+                     ▒▓▓▓▒░░░░▒▓▓▓▒
+                        ▒▒▓▓▓▓▒▒
+
+
+                Welcome to Metro v0.73.9
+              Fast - Scalable - Integrated
+
+r - reload the app
+d - open developer menu
+i - run on iOS
+a - run on Android
+
+info Opening the app on Android...
+info JS server already running.
+info Installing the app...
+Starting a Gradle Daemon, 1 busy and 2 incompatible Daemons could not be reused, use --status for details
+> Task :react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :react-native-gradle-plugin:classes UP-TO-DATE
+> Task :react-native-gradle-plugin:inspectClassesForKotlinIC UP-TO-DATE
+> Task :react-native-gradle-plugin:jar UP-TO-DATE
+
+> Configure project :react-native-firebase_app
+:react-native-firebase_app package.json found at /home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-firebase/app/package.json
+:react-native-firebase_app:firebase.bom using default value: 31.1.1
+:react-native-firebase_app:play.play-services-auth using default value: 20.3.0
+:react-native-firebase_app package.json found at /home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-firebase/app/package.json
+:react-native-firebase_app:version set from package.json: 16.7.0 (16,7,0 - 16007000)
+:react-native-firebase_app:android.compileSdk using custom value: 33
+:react-native-firebase_app:android.targetSdk using custom value: 33
+:react-native-firebase_app:android.minSdk using custom value: 21
+:react-native-firebase_app:reactNativeAndroidDir /home/hedgehog/apps/works/nus/Jarvis/node_modules/react-native/android
+
+> Configure project :react-native-firebase_messaging
+:react-native-firebase_messaging package.json found at /home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-firebase/messaging/package.json
+:react-native-firebase_app package.json found at /home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-firebase/app/package.json
+:react-native-firebase_messaging:firebase.bom using default value: 31.1.1
+:react-native-firebase_messaging package.json found at /home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-firebase/messaging/package.json
+:react-native-firebase_messaging:version set from package.json: 16.7.0 (16,7,0 - 16007000)
+:react-native-firebase_messaging:android.compileSdk using custom value: 33
+:react-native-firebase_messaging:android.targetSdk using custom value: 33
+:react-native-firebase_messaging:android.minSdk using custom value: 21
+:react-native-firebase_messaging:reactNativeAndroidDir /home/hedgehog/apps/works/nus/Jarvis/node_modules/react-native/android
+
+> Configure project :react-native-reanimated
+No AAR for react-native-reanimated found. Attempting to build from source.
+Android gradle plugin: 7.3.1
+Gradle: 7.5.1
+WARNING:Software Components will not be created automatically for Maven publishing from Android Gradle Plugin 8.0. To opt-in to the future behavior, set the Gradle property android.disableAutomaticComponentCreation=true in the `gradle.properties` file or use the new publishing DSL.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 8.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+See https://docs.gradle.org/7.5.1/userguide/command_line_interface.html#sec:command_line_warnings
+5 actionable tasks: 5 up-to-date
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred configuring project ':react-native-reanimated'.
+> java.lang.NullPointerException
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 25s
+
+Error: Command failed: ./gradlew app:installDebug -PreactNativeDevServerPort=8081
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred configuring project ':react-native-reanimated'.
+> java.lang.NullPointerException
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 25s
+
+    at makeError (/home/hedgehog/apps/works/nus/Jarvis/node_modules/execa/index.js:174:9)
+    at /home/hedgehog/apps/works/nus/Jarvis/node_modules/execa/index.js:278:16
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at async runOnAllDevices (/home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-community/cli-platform-android/build/commands/runAndroid/runOnAllDevices.js:82:7)
+    at async Command.handleAction (/home/hedgehog/apps/works/nus/Jarvis/node_modules/@react-native-community/cli/build/index.js:108:9)
+info Run CLI with --verbose flag for more details.
+

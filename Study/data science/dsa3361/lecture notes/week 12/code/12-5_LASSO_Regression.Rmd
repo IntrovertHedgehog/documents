@@ -1,0 +1,263 @@
+---
+title: "12-5 LASSO Regression"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **12-5 LASSO Regression**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will continue to work with the `boston_housing_price` data set. Before proceeding, place the data set `boston_housing_price.csv` in the `data` folder. This R markdown file itself, `12-5_LASSO_Regression.rmd`, should be placed in `src` folder.
+
+### Load Libraries
+
+In the following code, we load the required libraries: `car` is required for `vif()`. `corrplot` is required for `corrplot()`. And `plotmo` is required for `plot_glmnet()`.
+
+```{r message=FALSE}
+library(DescTools)
+library(car)  # for vif()
+library(corrplot)  # for corrplot()
+library(glmnet)
+library(plotmo) # for plot_glmnet()
+```
+
+### Load Data
+
+In the following code, we load the data into `df.housing` as before and prepare it to be used for training with `glmnet()` function. Note that we use the same seed, 4991 so that we train the LASSO model on the same training data as the Ridge model. 
+
+```{r}
+df.housing <- read.csv("../data/boston_housing_price.csv")
+
+# Standardise the variables
+scaler <- apply(df.housing, 2, sd)
+df.housing0 <- df.housing
+df.housing <- as.data.frame(apply(df.housing0, 2,
+                                  function (x)
+                                    x / sd(x)))
+
+set.seed(4991)
+rate <- 0.2
+train.size <- round(nrow(df.housing) * rate)
+sample <- sample(nrow(df.housing), train.size)
+training <- df.housing[sample,]
+test <- df.housing[-sample,]
+
+train.x <- model.matrix(Price ~ ., data = training)[, -1]
+train.y <- training[, ncol(training)]
+test.x  <- model.matrix(Price ~ ., data = test)[, -1]
+test.y  <- test[, ncol(test)]
+```
+
+### Slide 12
+
+In the following code, we train a LASSO model with $\lambda=0.1$ with the `glmnet()` function. Note that the `alpha` parameter is set to 1, for LASSO regression, whereas it is set to 0 for Ridge regression. 
+
+```{r}
+model_LASSO_trial1 <- glmnet(train.x,
+                             train.y, 
+                             alpha = 1, 
+                             lambda = 0.1)
+t(coef(model_LASSO_trial1))
+```
+
+### Slide 13
+
+In the following code, we train a LASSO model with $\lambda=0.5$.
+
+```{r}
+model_LASSO_trial2 <- glmnet(train.x,
+                             train.y, 
+                             alpha = 1, 
+                             lambda = 0.5)
+t(coef(model_LASSO_trial2))
+```
+
+In the following code, we train a LASSO model with $\lambda=1$.
+
+```{r}
+model_LASSO_trial3 <- glmnet(train.x, 
+                             train.y, 
+                             alpha = 1, 
+                             lambda = 1)
+t(coef(model_LASSO_trial3))
+```
+
+### Slide 14
+
+In the following code, we compare the coefficients of `model_LASSO_trial1` ($\lambda=0.1$), `model_LASSO_trial2` ($\lambda=0.5$) and `model_LASSO_trial3` ($\lambda=1$).
+
+```{r}
+table_summary <- cbind(coef(model_LASSO_trial1), 
+                       coef(model_LASSO_trial2), 
+                       coef(model_LASSO_trial3))
+
+colnames(table_summary) <- c("lambda = 0.1", 
+                             "lambda = 0.5", 
+                             "lambda = 1")
+table_summary
+```
+
+## Slide 15
+
+In the following code, we train 100 LASSO models from $\lambda=10^{-5}$ to $\lambda=1$.
+
+```{r}
+lambda <- 10^seq(-5, 0, length = 100)
+LASSO_model <- glmnet(train.x, train.y, alpha = 1, lambda = lambda)
+```
+
+In the following code, we plot the coefficient of each predictor against $log(\lambda)$.
+
+```{r}
+add_lbs <- function(fit, offset_x=2.5) {
+  L <- length(fit$lambda)
+  x <- log(fit$lambda[L])+ offset_x
+  y <- fit$beta[, L] + c(0, -0.05, 0, 0.05, 0)
+  labs <- names(y)
+  text(x, y, labels=labs, cex=1)
+}
+
+plot(LASSO_model, xvar = "lambda", label = TRUE)
+title(main="Coefficients of Predictors vs. Log(Lambda)",
+      cex.main=1.4,  adj=0, line=3)
+
+title(sub="Number of Predictors",
+      cex.sub=1.1,
+      adj=0.55, line=-21.5)
+
+add_lbs(LASSO_model)
+
+legend("topright", lwd = 1, col = 1:6,
+       legend = colnames(train.x), cex = .7)
+```
+
+## Slide 21
+
+In the following code, we use a simpler method to generate the same plot of the coefficient of each predictor against $log(\lambda)$.
+
+```{r}
+plot_glmnet(LASSO_model)
+```
+
+## Slide 22
+
+In the following code, we perform 10-fold cross-validation to determine the optimal value of $\lambda$. `lambda.min` is the $\lambda$ at which the smallest MSE is achieved; and `lambda.1se` is the largest lambda at which the MSE is within one standard error of the smallest MSE.
+
+```{r}
+set.seed(123)
+cv_LASSO <- cv.glmnet(train.x, train.y, 
+                      alpha = 1, type.measure = "mse")
+cv_LASSO
+```
+
+## Slide 23
+
+In the following code, we visualise the relationship between $log(\lambda)$ and the Mean-Squared Error.
+
+```{r}
+# Generate plot
+plot(cv_LASSO)
+
+# Insert and label vertical line for lambda.min
+abline(v=log(cv_LASSO$lambda.min), col = "red", lty=5)
+text(log(cv_LASSO$lambda.min)- 0.3, 1.4, 
+     labels= paste0("lambda_min = ", 
+                    round(cv_LASSO$lambda.min, digits = 3)), cex = 1.4)
+
+# Insert and label vertical line for lambda.1se
+abline(v=log(cv_LASSO$lambda.1se), col = "red", lty=5)
+text(log(cv_LASSO$lambda.1se)- 0.3, 1.25, 
+     labels= paste0("lambda_1se = ", 
+                    round(cv_LASSO$lambda.1se, digits = 3)) , cex = 1.4)
+```
+
+## Slide 25
+
+In the following code, we train a LASSO model using `lambda.min` and return its coefficients.
+
+```{r}
+glm_LASSO <- glmnet(train.x, train.y, 
+                    alpha = 1, lambda = cv_LASSO$lambda.min)
+t(coef(glm_LASSO))
+```
+
+## Slide 26
+
+In the following code, we define the function `eval_results(fit, true)` to return the evaluation metrics for a given model.
+
+```{r}
+eval_results <- function(fit, true) {
+  actual <- data.matrix(true)
+  SSE <- sum((actual - fit)^2)
+  SST <- sum((actual - mean(actual))^2)
+  R_square <- 1 - SSE / SST
+  data.frame(
+    MSE = MSE(fit, true),
+    MAE = MAE(fit, true),
+    RMSE = RMSE(fit, true),
+    MAPE = MAPE(fit, true),
+    R2 = R_square
+  )
+}
+```
+
+In the following code, we return the evaluation metrics for the LASSO model on the training data. 
+
+```{r}
+fit <- predict(glm_LASSO, train.x)
+true <- train.y
+summary_LASSO_train <- eval_results(fit, true)
+summary_LASSO_train
+```
+
+In the following code, we return the evaluation metrics for the LASSO model on the test data.
+
+```{r}
+fit <- predict(glm_LASSO, test.x)
+true <- test.y
+summary_LASSO_test <- eval_results(fit, true)[-5]
+summary_LASSO_test
+```
+
+In the following code, we summarise the performances of the LASSO model on the training data and the test data.
+
+```{r}
+summary_LASSO <- rbind(summary_LASSO_train[-5], summary_LASSO_test)
+rownames(summary_LASSO) <- c("LASSO_train", "LASSO_test")
+knitr::kable(summary_LASSO, digits = 3)
+```
+
+## Slide 27
+
+In the following code, we inspect the residuals from the LASSO model.
+
+```{r}
+# Obtain the fitted values
+fit <- predict(glm_LASSO, train.x)
+# Obtain the true values
+true <- train.y
+
+# Plot the residuals
+plot(fit, true - fit, 
+     main = "Residual Plot of the LASSO Regression Model on Training data", 
+     xlab = "Fitted Value", ylab = "Residuals")
+
+# Insert a horizontal lines to mark where the standardised residuals 
+# are equal to 0, 1 and -1 respectively.
+abline(h = 0, col = "red", lwd = 2)
+abline(h = 1, col = "red", lty = 2, lwd = 2)
+abline(h = -1, col = "red", lty = 2, lwd = 2)
+```
+
+
+## Slide 28: Apply: Make Predictions
+
+In the following code, we use the LASSO model to generate a prediction for a new data point.
+
+```{r}
+new_data <- data.frame(Crime_rate = 0.00632, 
+                       Industry = 2.31, 
+                       Number_of_rooms = 6.575,
+                       Access_to_highways = 1, 
+                       Tax_rate = 296)
+new_x <- data.matrix(new_data/scaler)
+predict(glm_LASSO, new_x ) * scaler[6]
+```

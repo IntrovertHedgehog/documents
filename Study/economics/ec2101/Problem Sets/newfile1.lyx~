@@ -1,0 +1,800 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #b5bd68
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Le Van Minh - Tan San Xuin
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 1
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U(x,y)=6\sqrt{x}+y
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+MU_{x}=\frac{\delta U}{\delta x}=\frac{3}{\sqrt{x}};MU_{y}=\frac{\delta U}{\delta y}=1
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+MRS_{x,y}=\frac{MU_{x}}{MU_{y}}=\frac{3}{\sqrt{x}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(a) Yes, since U increases when either x or y increases
+\end_layout
+
+\begin_layout Standard
+(b) As x inceases, 
+\begin_inset Formula $MU_{x}$
+\end_inset
+
+ diminishes
+\end_layout
+
+\begin_layout Standard
+(c) As y increases, 
+\begin_inset Formula $MU_{y}$
+\end_inset
+
+ remains constant
+\end_layout
+
+\begin_layout Standard
+(d) 
+\begin_inset Formula $MRS_{x,y}=\frac{3}{\sqrt{x}}$
+\end_inset
+
+, MRS only depends on x, as x increases along the indifference curve, 
+\begin_inset Formula $MRS_{x,y}$
+\end_inset
+
+ diminishes
+\end_layout
+
+\begin_layout Standard
+(e) For U=20
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Desktop/1d.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For U=30
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Desktop/1dnd.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 2
+\end_layout
+
+\begin_layout Standard
+(a)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Desktop/2a.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(b)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Desktop/2a (copy).png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(c) Moana's utility maximization problem
+\begin_inset Formula 
+\[
+\underset{d,f}{max}U(d,f)=df
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to: 
+\begin_inset Formula $g(d,f)=100d+400f-4000=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Lagrangian function: 
+\begin_inset Formula $\Lambda(d,f,\lambda)=U(d,f)+\lambda g(d,f)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=df+\lambda(100d+400f-4000)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solving Lagrangian function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\frac{\delta\Lambda}{\delta d}=f+100\lambda & =0\\
+\frac{\delta\Lambda}{\delta f}=d+400\lambda & =0\\
+\frac{\delta\Lambda}{\delta\lambda}=100d+400f-4000 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+4(f+100\lambda) & =0\\
+d+400\lambda & =0\\
+100d+400f-4000 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+d-4f & =0\\
+d+400\lambda & =0\\
+100d+400f-4000 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+d & =20\\
+f & =5\\
+\lambda & =-0.05
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 3
+\end_layout
+
+\begin_layout Standard
+(a) 
+\begin_inset Formula 
+\[
+\underset{x,y}{max}U(x,y)=\sqrt{xy}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to: 
+\begin_inset Formula $g(x,y)=4x+4y-400=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Lagrangian function: 
+\begin_inset Formula $\Lambda(x,y,\lambda)=U(x,y)+\lambda g(x,y)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+=\sqrt{xy}+\lambda(4x+4y-400)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solving Lagrangian function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\frac{\delta\Lambda}{\delta x}=\frac{1}{2}\sqrt{\frac{y}{x}}+4\lambda & =0\\
+\frac{\delta\Lambda}{\delta y}=\frac{1}{2}\sqrt{\frac{x}{y}}+4\lambda & =0\\
+\frac{\delta\Lambda}{\delta\lambda}=4x+4y-400 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\frac{1}{2}\sqrt{\frac{y}{x}}-\frac{1}{2}\sqrt{\frac{x}{y}} & =0\\
+\frac{1}{2}\sqrt{\frac{x}{y}}+4\lambda & =0\\
+4x+4y-400 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\sqrt{\frac{y}{x}} & =\sqrt{\frac{x}{y}}\\
+\lambda & =-\frac{1}{8}\sqrt{\frac{x}{y}}\\
+4x+4y-400 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+x & =y\\
+\lambda & =-\frac{1}{8}\sqrt{\frac{x}{y}}\\
+4x+4y-400 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+x & =y\\
+\lambda & =-\frac{1}{8}\sqrt{\frac{x}{y}}\\
+4x+4y-400 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\lambda & =-0.125\\
+x & =50\\
+y & =50
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(b)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{x,y}{max}U(x,y)=\sqrt{xy}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to: 
+\begin_inset Formula $g(x,y)=4x+4y-720=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using the same process in (a)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\lambda & =-0.125\\
+x & =90\\
+y & =90
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(c)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{x,y}{max}U(x,y)=\sqrt{xy}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to: 
+\begin_inset Formula $\begin{cases}
+4x+4y-720=0 & x\geq80\\
+4y=100 & x<80
+\end{cases}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hypothetically 
+\begin_inset Formula $x\ge80$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solve similarly to (b):
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\lambda & =-0.125\\
+x & =90\\
+y & =90
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hypothesis is satisfied, accepting this basket as optimal.
+\end_layout
+
+\begin_layout Standard
+(d) With the cash subsidy:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\underset{x,y}{max}U(x,y)=\sqrt{xy}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to: 
+\begin_inset Formula $g(x,y)=4x+4y-880=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solve the optimization using Lagrage's method:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\lambda & =-0.125\\
+x & =110\\
+y & =110
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U(x,y)_{cash}=110
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With the coconut (x) voucher:
+\begin_inset Formula 
+\[
+\underset{x,y}{max}U(x,y)=\sqrt{xy}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to: 
+\begin_inset Formula $\begin{cases}
+4x+4y-880=0 & x\geq120\\
+4y=100 & x<120
+\end{cases}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assuming 
+\begin_inset Formula $x\ge120$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solve the optimization using Lagrage's method:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+\lambda & =-0.125\\
+x & =110\\
+y & =110
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Assumption not satisfied, optimal basket occurs at 
+\begin_inset Formula $x=120$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\Rightarrow\begin{cases}
+x & =120\\
+4x+4y-880 & =0
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\begin{cases}
+x & =120\\
+y & =100
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+U(x,y)_{voucher}=109.55
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Therefore, Pue's optimal utility of when given cash subsity is greater than
+ coconut voucher
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Question 4
+\end_layout
+
+\begin_layout Standard
+(a) 
+\end_layout
+
+\begin_layout Standard
+B lies below 
+\begin_inset Formula $BL_{1}=>A\succ B$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+C lies below 
+\begin_inset Formula $BL_{2}\Rightarrow B\succ C$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+D is on the budget line with C 
+\begin_inset Formula $\Rightarrow C\succeq D$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using these informations: 
+\begin_inset Formula $A\succ B\succ C\succeq D$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(b) The area under 
+\begin_inset Formula $BL_{2}$
+\end_inset
+
+ is strictly less prefered to B since those basket cost less and should
+ not be able to achieve same utility as B.
+\end_layout
+
+\begin_layout Standard
+The area on and under 
+\begin_inset Formula $BL_{3}$
+\end_inset
+
+ is strictly less prefered to B, since they are strictly less prefered to
+ C and C is less prefered to B
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Desktop/4d.png
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+(c) The rectangle above and to the right of B is prefered to B since the
+ two goods satisfy monoticity.
+\end_layout
+
+\begin_layout Standard
+The rectangle above and to the right of A is prefered to B, since they are
+ prefered to A and 
+\begin_inset Formula $A\succ B$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename /home/hedgehog/Desktop/4dnd.png
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

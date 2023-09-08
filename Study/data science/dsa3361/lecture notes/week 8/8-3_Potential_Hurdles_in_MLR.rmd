@@ -1,0 +1,256 @@
+---
+title: "8-3 Potential Hurdles in Multiple Linear Regression"
+output: pdf_document
+---
+
+This markdown file contains the R codes for the Video: **8-3 Potential Hurdles in MLR**. We have shown the slide number associated with each chunk of code for easy reference.
+
+In this video, we will work with the `Advertising3` data set. Before proceeding, place the data set `Advertising3.csv` in the `data` folder. This R markdown file itself, `8-3_Potential_Hurdles_in_MLR.rmd`, should be placed in `src` folder.
+
+## Load packages
+
+We load the packages using the `library()` function. Ensure that the packages are installed before doing this.
+
+```{r include = FALSE}
+library(tidyverse)
+library(ggpubr)
+library(gridExtra)
+library(car)
+```
+
+## Slide 6
+
+The data is in the CSV (comma separated values) format. We will continue to use the `read.csv()` function to read in the data. The `read.csv()` function returns the dataset in the form of a data frame, and is stored in the variable `df.advert`. As before, we view the top few rows in `df.advert` using the `head()` function.
+
+Note that the advertising dataset still has the `Sales.Revenue` variable, but an additional predictor variable, `SocialMedia` has been added the advertising channels.
+
+```{r, message = FALSE}
+df.advert <- read.csv("../data/Advertising3.csv")
+head(df.advert)
+```
+
+## Slide 7
+
+Let's visualise the relationship between each predictor variable X and the response variable Y and ensure the relationship is linear. We will plot a scatter plot for each X-Y combination, as before. In this plot, we will also show the regression for each X-Y relationship. To do this, we will use the `stat_regline_equation()` function in the library `ggpubr`. Recall, we are already using the `stat_cor()` function from the same library to show the correlation coefficient.
+
+We specify the `mapping` parameter in the `stat_regline_equation()` function to use the `..eq.label..`. Notice that we also specify the `label.y` parameter in both `stat_cor()` and `stat_regline_equation()` functions to position the labels one below the other. The values chosen for the `label.y` are within the range of the y-axis values, in this case, `Sales.Revenue`.
+
+```{r}
+p.scatter.slr1 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = TV)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  stat_cor(method = "pearson", 
+           mapping = aes(label = paste("r", ..r.., sep = "~`=`~")), 
+           label.y = 28) + 
+  stat_regline_equation(mapping = aes(label = ..eq.label..), label.y = 30)
+p.scatter.slr1
+
+```
+
+Similarly, now we plot the scatter plots for `Sales.Revenue` vs `Radio`, and `Sales.Revenue` vs `Newspaper` and `Sales.Revenue` vs `SocialMedia`.
+
+```{r}
+p.scatter.slr2 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = Radio)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  stat_cor(method = "pearson", 
+           mapping = aes(label = paste("r", ..r.., sep = "~`=`~")), 
+           label.y = 28) + 
+  stat_regline_equation(mapping = aes(label = ..eq.label..), label.y = 30)
+p.scatter.slr2
+
+p.scatter.slr3 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = Newspaper)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  stat_cor(method = "pearson", 
+           mapping = aes(label = paste("r", ..r.., sep = "~`=`~")), 
+           label.y = 28) + 
+  stat_regline_equation(mapping = aes(label = ..eq.label..), label.y = 30)
+p.scatter.slr2
+
+p.scatter.slr4 <-
+  ggplot(data = df.advert,
+         mapping = aes(y = Sales.Revenue, x = SocialMedia)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  stat_cor(method = "pearson", 
+           mapping = aes(label = paste("r", ..r.., sep = "~`=`~")), 
+           label.y = 28) + 
+  stat_regline_equation(mapping = aes(label = ..eq.label..), label.y = 30)
+p.scatter.slr4
+```
+
+To compare the plots with each other, we can display them side by side with the `grid.arrange()` function in `gridExtra` package.
+
+```{r}
+grid.arrange(p.scatter.slr1, p.scatter.slr2, 
+             p.scatter.slr3, p.scatter.slr4, nrow=2) 
+```
+
+## Slide 8
+
+To check for the possibility of multicollinearity we need to compute the correlation coefficient of each pair of predictor variables. To do this, we will use `cor()` function again. We will include all the variables in the dataset and consider the correlation matrix. So, the input to the `cor()` function is the entire data frame, `df.advert`.
+
+```{r}
+correlation <- cor(df.advert)
+correlation
+```
+
+## Slide 10
+
+To compute the variance inflation factor (VIF), we need to fit a linear regression model. First we will randomly split the data into train and test datasets, using the same code as before.
+
+```{r}
+set.seed(10)
+index <-
+  sort(sample(x = nrow(df.advert), size = nrow(df.advert) * .8))
+train <- df.advert[index,]
+test <- df.advert[-index,]
+```
+
+Let us now fit a multiple linear regression model to our dataset, using the `lm()` function, using all the predictors. The model output is stored in `lm1`.
+
+```{r}
+lm1 <-
+  lm(formula = Sales.Revenue ~ TV + Radio + Newspaper + SocialMedia,
+     data = train)
+```
+
+Now, we are ready to compute the variance inflation factor (VIF) for this model.
+
+```{r}
+vif(lm1)
+```
+
+## Slide 11-13
+
+We now consider the model summary. This is generated using the `summary()` function.
+
+```{r}
+summary(lm1)
+```
+
+## Slide 14-15
+
+Here, we fit a model without the variable, `Radio` and save it in `lm2`. We can check the VIF for this new model.
+
+```{r}
+lm2 <- lm(formula = Sales.Revenue ~ TV + Newspaper + SocialMedia,
+          data = train)
+summary(lm2)
+vif(lm2)
+```
+
+## Slide 16
+
+Here, we fit a model after dropping both `Radio` and `Newspaper`.
+
+```{r}
+lm3 <- lm(formula = Sales.Revenue ~ TV + SocialMedia,
+          data = train)
+summary(lm3)
+vif(lm3)
+```
+
+## Slide 24-26
+
+Let us now add an additional city to our advertising dataset, and assume this is part of the `train` data. We use the `rbind()` function to add the additional row to the `train` data. Since this city is row 201, we will also name the row accordingly in the `train` data, to help us identify this new observation in plots later on. We use the `row.names()` function for this.
+
+```{r}
+newdata <- data.frame(TV = 300, Radio = 21, Newspaper = 44, 
+                      SocialMedia = 250, Sales.Revenue = 30)
+train2 <- rbind(train, newdata)
+row.names(train2)[161]="201"
+```
+
+Let us we fit a model on this new `train2` dataset, and save it in `lm4`.
+
+```{r}
+lm4 <- lm(formula = Sales.Revenue ~ TV + SocialMedia,
+          data = train2)
+```
+
+We are now ready to generate the diagnostic plot of residuals vs. fitted values. We will use the `plot()` function and specify the `which` parameter as 1.
+
+```{r}
+plot(lm4, which = 1)
+```
+
+## Slide 29
+
+Cook's distance is a commonly used estimate of the *influence* of a data point when performing regression. Cook's distance is therefore calculated for each observation. We can visualise the cook's distance using the `plot()` function, by selecting the subplot 4 with `which` parameter set to 4.
+
+```{r}
+plot(lm4, which=4)
+```
+
+We can also compute the Cook's distance using the `cooks.distance()` function from the `stat` library.
+
+```{r}
+cooksD <- cooks.distance(lm4)
+```
+
+A general rule of thumb to identify influential points, is to consider those observations that have a Cook's distance larger than 3 times the mean Cook's distance. We first find the mean Cook's distance using `mean()` function. We remove any NA's in the data while computing this by setting the `na.rm` parameter to `TRUE`.
+
+```{r}
+mean.cooksD <- mean(cooksD, na.rm = TRUE)
+```
+
+Next, we extract those observations with Cook's distance greater than 3 times `mean.cooks.infl`. Notice how we add this condition *inside* the square brackets.
+
+```{r}
+influential <- cooksD[cooksD > (3 * mean.cooksD)]
+influential
+```
+
+## Slide 30
+
+Let us now go back to our training data without the suspected influential point, `train`, and visualise Cook's distance for the corresponding model, `lm3`.
+
+```{r}
+plot(lm3, which = 4)
+```
+
+## Slide 31-32
+
+We can also consider the residual vs leverage plot. Let us generate this plot for the linear regression model we trained with the influential point, `lm4`. The dashed red lines represent the Cook's distance values of 0.5 and 1. As a general rule of thumb an observations falling outside these dashed lines, is considered an influential point.
+
+```{r}
+plot(lm4, which=5)
+```
+
+Also, the observations that have standardised residuals above 3, or below -3 can be considered as influential points. Let us remove all the influential points and generate the new model.
+
+To remove the observations by their row names, we follow these steps:
+
+-   First get the row names using the `row.names()` function on the `train2` data.
+
+-   Create the list of row names of the influential points using the `c()` function, that combines the row names into a list.
+
+-   Use the `%in%` operator to compare all the row names with the list of influential points. This will return a TRUE for the influential points.
+
+-   Select only those observations that are NOT in the list, i.e. when the above comparison not TRUE. This is achieved using the `!` operator in front of the condition.
+
+-   Save this in `train3`.
+
+```{r}
+train3 <- train2[!(row.names(train2) %in% c(131, 151, 201)), ]
+
+lm5 <- lm(formula = Sales.Revenue ~ TV + SocialMedia,
+          data = train3)
+```
+
+## Slide 33
+
+We will consider the impact on the adjusted-R squared values for the models when the influential points are all removed.
+
+```{r}
+summary(lm4) # Before
+summary(lm5) # After 
+```

@@ -1,0 +1,122 @@
+---
+title: "Week 3 Tutorial"
+author: "Enter your name (Matriculation number)"
+output:
+  html_document:
+    df_print: paged
+urlcolor: blue
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE, 
+                      fig.align = "center",  out.width = "80%")
+```
+
+# Question 1 Base `R` syntax
+
+1. Create a vector of all integers from 13 to 21, and save it as `a1`.
+
+2. Create a vector of *odd* integers from 13 to 21, and save it as `a2`.
+
+3. What is the sum of `a1` and `a2`?
+
+4. The formula for the first `n` integers is $n(n+1)/2$. Compute the sum of all integers from 1 to 100 and verify that this formula holds for `n = 100`.
+
+**Suggested solutions**
+
+```{r}
+# Q1.1
+a1 = 13:21
+
+# Q1.2
+a2 = c(13, 15, 17, 19, 21)
+a2 = seq(13, 21, by = 2)    # Alternative way 
+
+# Q1.3
+a1 + a2
+
+# Q1.4
+# Summation of all integers from 1 to 100
+sum(1:100)
+# Verify the formula for n = 100
+n = 100
+n * (n+1) /2
+```
+
+# Question 2 Base `R` data manipulation and plotting
+The following code loads a built-in `R` data set `airquality`. The data contain daily air quality measurements in New York in 1973. 
+
+```{r include = TRUE}
+data(airquality)
+```
+
+*To learn more about the data set, type `?airquality` in your `R` console and read the documentation file.*
+
+1. What does the command `summary(airquality)` do? What does the command `class(airquality)` do?
+
+2. Using the `str()` command to view the structure of this data set. How many months are there in the data set?
+
+3. Is there any missing entries in the `airquality` data frame? If there is, eliminate row(s) that contain missing values and save it in a new data frame called `df`.
+
+4. For the remaining questions, we will work on the data frame `df`. Create two new data frames, one for summer months (May and June) and the other for fall months (July, August, and September) and name them as `df_summer` and `df_fall`, respectively.
+
+5. Do summer and fall months have similar temperature? Create a factor variable `Season` in `df` that takes value of `Summer` for May and June, and `Fall` for July, August, and September. Compute the summary statistics of temperature in summer and fall.
+
+6. Recode the `Month` variable from 5 - 9 to May through September. Recreate the boxplot below comparing temperature across all months.
+
+**Suggested solutions**
+
+```{r}
+# Q2.1 
+summary(airquality)  # Compute summary statistics for variables in an object
+class(airquality)    # Find out the class type of an object
+
+# Q2.2
+str(airquality)
+table(airquality$Month)
+
+# Q2.3
+sum(is.na(airquality))   # Check whether there are missing values
+df = na.omit(airquality) # Remove entries with missing values
+
+# Q2.4
+df_summer = df[df$Month <= 6, ]
+df_fall = df[df$Month > 6, ]
+
+# Q2.5
+df$Season = factor(ifelse(df$Month <= 6, "Summer", "Fall"))
+tapply(df$Temp, df$Season, summary)
+
+# Q2.6
+# Recode the Month variable with indexing
+df$Month[df$Month == 5] = "May"
+df$Month[df$Month == 6] = "June"
+df$Month[df$Month == 7] = "July"
+df$Month[df$Month == 8] = "August"
+df$Month[df$Month == 9] = "September"
+df$Month = factor(df$Month, levels = c("May", "June", "July", "August","September"))
+
+# Alternative way
+df$Month = factor(df$Month)
+levels(df$Month) = c("May", "June", "July", "August", "September")
+
+# Boxplot of temperature across all months
+boxplot(df$Temp ~ df$Month,
+        xlab = "Month", ylab = "Temperature", main = "Monthly temperature in New York")
+```
+
+**Comments and requirements:**
+
+An important learning outcome for this class is to have good `R` programming practice. Later on, you will be working in teams of data scientists. It is important to write code that others can run/use and ensure that others can easily reproduce your exact findings.
+
+You should start to practice answering tutorial questions in an `R` Markdown file (`Rmd`). Ensure your `Rmd` file can knit to HTML before you submit/share it with anyone else. If you need to read data into `R`, make sure you use our usual relative path settings.
+
++ Your `R` Markdown file should be in `src` folder, and your data should be in `data` folder, at the same level.
+    
++ Your `Rmd` code should **not** contains calls to `setwd` or `install.packages`. Do not call `View` or `edit` in your `Rmd` -- these are interactive commands and do not work well in scripts.
+
++ Use headers to divide your code into appropriate, titled sections, and possibly sub-sections. For example: Question 1, Question 2, ...
+    
++ To test if others are able to knit your code, clear out your environment and then knit the file. This ensures that your code does not use stray objects in your global workspace.
+
+**From Week 5 onwards, your code must be in a single `Rmd` file, and must generate the required objects.**

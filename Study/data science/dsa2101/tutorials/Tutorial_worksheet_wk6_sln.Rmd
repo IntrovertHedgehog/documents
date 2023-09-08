@@ -1,0 +1,158 @@
+---
+title: "Week 6 Tutorial"
+author: "Enter your name (Matriculation number)"
+output:
+  html_document:
+    df_print: paged
+urlcolor: blue
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE, 
+                      fig.align = "center",  out.width = "80%")
+```
+
+# Question 1. International visitor arrivals in Singapore
+
+*Some comments on the raw data:*
+
++ There are redundant rows in the data set. Please be careful about this. Don't trust every data set you are given.
+
++ In the data, tourist arrival lengths are summarized in intervals with varying width. Some of the intervals are overlapping. 
+
+Here is one solution to remove those rows in base `R`.
+
+```{r}
+library(readxl)
+arrivals = read_excel("../data/tourist_arrivals_length_of_stay_2022.xlsx", range="A10:G26")
+
+# Remove the "average length of stay" row
+arrivals = arrivals[2:15, ]
+
+# Remove the "15 and over" row
+arrivals = arrivals[-11, ]
+```
+
+The code below creates a box plot for December 2022. 
+
+Remember that we should not be afraid to add text to the graphic. Texts, numbers, and images all carry information.
+
+```{r}
+# Subset 2022 data
+arrivals_dec = arrivals[, 1:2]
+arrivals_dec$pct = arrivals_dec[[2]]/sum(arrivals_dec[[2]])
+
+# Create a box plot
+barplot(arrivals_dec$pct, 
+        names.arg = c(0:7, "8-10",  "11-14", "15-29", "30-59", "60+"), 
+        cex.names = 0.8, cex.axis = 0.8, las = 2,
+        main = "Tourists' Length of Stay, Dec 2022", ylab = "Percentage of Arrivals", 
+        xlab = "Number of days")
+```
+
+# Question 2. YRBSS questionnaires
+
+*Some comments:* There are many ways to read and analyze data in `R`. We introduced two syntaxes (or dialects) in lecture: Base `R` and `tidyverse`. Base `R` is what you get when you open up `R` for the first time. It focuses on stability. `tidyverse` is a more modern add-on package that emphasizes on readability and flexibility. 
+
+In this section, we give you *some* comparisons and translations between base `R` and `tidyverse` - they are far from exhaustive, but hopefully they provide you a sense of how one might conduct the same task across different coding dialects.
+
+## Question 2.1
+
+```{r}
+# Read in the data 
+library(tidyverse)
+yrbss = read.csv("../data/yrbss_data.csv", stringsAsFactors = TRUE)
+
+# Basic data cleaning
+yrbss = yrbss %>% 
+  drop_na() %>% 
+  distinct() %>%
+  rename(id = record, weight_kg = stweight)
+```
+
+## Question 2.2
+
+```{r}
+# Tidyverse syntax
+qn2_1 = yrbss %>% filter(bmi < 15, sex == "Female") %>%
+  select(id, age, race4)
+
+# The corresponding Base R commands
+qn2_1 = yrbss[yrbss$bmi < 15 & yrbss$sex == "Female", c("id", "age", "race4")]
+```
+
+## Question 2.3
+
+Make sure your answers/explanations are written under in a text section titled "Question 2.3".
+
+1. Select all columns except for those between `grade` and `race7` (both ends inclusive). As a result, the code selects `id`, `age`, `sex`, `bmi`, and `weight_kg` from `yrbss`.
+
+2. Select columns that start with the prefix "race", namely `race4` and `race7`. As a result, the code selects `race4` and `race7` from `yrbss`.
+
+3. Select all columns from `yrbss`. In the resulting data frame, the columns will be ordered as `id`, `sex`, and everything else.
+
+4. Select all numeric columns from `yrbss`, namely `id`, `bmi`, and `weight_kg`.
+
+
+## Question 2.4
+
+```{r}
+# Tidyverse syntax
+yrbss = yrbss %>% 
+  mutate(height_m = sqrt(weight_kg/bmi))
+
+# The corresponding Base R commands
+yrbss$height_m = sqrt(yrbss$weight_kg/yrbss$bmi)
+``` 
+
+## Question 2.5
+
+Make sure your answers/explanations are written under in a text section titled "Question 2.5".
+
+1. Create a new variable `grade_num` in `yrbss` that only contains the numerical grade of each observation.
+
+2. Convert factor variable(s) to lower cases.
+
+3. Round numeric variable(s) to the nearest integer.
+
+4. Convert variables between `age` and `grade` (both ends inclusive) to upper cases.
+
+## Question 2.6
+
+```{r}
+# Compute grouped summaries
+qn2_6 = yrbss %>% group_by(age) %>%
+  summarize(bmi_mean = mean(bmi),
+            bmi_sd = sd(bmi)) 
+
+# The corresponding command in base R
+# The resulting object, qn2_6_1, is an array, instead of data frame.
+qn2_6_1 = tapply(yrbss$bmi, yrbss$age, function(x) c(mean(x), sd(x)))
+``` 
+
+---
+
+**Important requirements:**
+
++ Clear out your environment and then knit the file again. Make sure your `Rmd` can knit to HTML.
+
++ The code in your `Rmd` file should create the following objects: `yrbss`, `qn2_2`, `qn2_6`.
+
++ The knitted HTML file should contain 
+    
+    + a bar plot for Question 1.
+        
+    + two markdown text sections entitled "Question 2.3" and "Question 2.5" (instead of comments inside code chunks).
+
+Again, approach your tutor after your tutorial session if you are not sure about **any** of the requirements above.
+
+
+
+
+
+
+
+
+
+
+

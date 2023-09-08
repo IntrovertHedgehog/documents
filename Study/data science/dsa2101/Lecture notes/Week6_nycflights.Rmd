@@ -1,0 +1,257 @@
+---
+title: "Exercises on `nycflights13::flights`"
+subtitle: "Week 6, AY2022/23 Sem 1"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: 
+      collapse: false
+      smooth_scroll: true
+urlcolor: blue
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, message = FALSE, warning = FALSE, 
+                      fig.align = "center",  out.width = "80%")
+```
+
+The `nycflights13::flights` data contain all 336,776 flights departed from the New York City in 2013. We first encountered the data in Week 5. We will use it to practice our `tidyverse` skills.
+
+First, let us load the required packages and read in the data.
+
+```{r}
+library(tidyverse)
+library(nycflights13)
+flights
+```
+
+# Subset observations by their values
+
+## 1. Select all flights on Jan 1, 2013.
+
+```{r}
+filter(flights, month == 1, day == 1)
+```
+
+## 2. Find all flights that were delayed (on arrival or departure) by more than two hours.
+
+    *There are usually more than one ways to perform a task in `tidyverse`. Brainstorm other methods if you can.*
+
+```{r}
+# 1
+filter(flights, arr_delay >= 120 | dep_delay >= 120)
+# 2
+filter(flights, !(arr_delay < 120 & dep_delay < 120))
+```
+
+## 3. Find all flights that departed in summer (July, August, and September).
+
+```{r}
+# 1
+filter(flights, month == 7 | month == 8 | month == 9)
+# 2
+filter(flights, month %in% c(7, 8, 9))
+# 3
+filter(flights, between(month, 7, 9))
+```
+
+## 4. Find all flights that had a missing `dep_time`.
+
+```{r}
+filter(flights, is.na(dep_time))
+```
+
+Notably, the `arr_time` is also missing for these observations. Flights with missing `dep_time` seemed to be the flights that were cancelled.
+
+# Subset columns by their names
+
+## 1. Select columns by name.
+
+```{r}
+# 1
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+# 2
+select(flights, starts_with("dep_"), starts_with("arr_"))
+```
+
+## 2. Select numeric columns from the tibble.
+
+```{r}
+select_if(flights, is.numeric)
+```
+
+## 3. Select flights originated from JFK and subset certain columns. After that, assign the tibble to an object named `flights_small`.
+
+```{r}
+flights_small = flights %>% filter(origin == "JFK") %>%
+select(year:day, dest, ends_with("delay"), distance, dep_time)
+```
+
+The code chunk does **not** display any output as we assigned the tibble to an object.
+
+# Extract hours and minutes from departure time.
+
+## 1. Compute `hour` and `minute` from `dep_time`, using the `flights_small` tibble we just created.
+
+```{r}
+flights_small %>% select(year:day, dest, dep_time) %>%
+  mutate(hour = dep_time %/% 100,
+  minute = dep_time %% 100) %>% head(3)
+```
+
+The code above only prints the first 3 observations of the data, instead of all.
+
+# Relationship between flight delays
+## 1. Delays are typically temporally correlated. 
+
+    Suppose we want to explore (and visualize) the relationship between flight delays and the delay of the immediately preceding flight.
+
+```{r}
+lagged_delays = flights %>% arrange(origin, month, day, dep_time) %>%
+  group_by(origin) %>%
+  # remove cancelled flights
+  filter(!is.na(dep_delay)) %>%
+  # departure delay of the preceding flight from the same airport
+  mutate(lag_dep_delay = lag(dep_delay)) %>%
+  select(origin, month, day, dep_delay, lag_dep_delay)
+
+lagged_delays %>% head(3)
+```
+
+```{r}
+lagged_delays_avg = lagged_delays %>%
+  # remove the first flight of a day
+  filter(!is.na(lag_dep_delay)) %>%
+  # compute mean departure delay for each lagged delay value
+  group_by(lag_dep_delay) %>%
+  summarize(dep_delay_mean = mean(dep_delay)) 
+
+# Plotting in base R
+plot(lagged_delays_avg$dep_delay_mean ~ lagged_delays_avg$lag_dep_delay,
+     pch = 16, col = rgb(0, 0, 0, alpha = 0.4),
+     xlab = "Previous Departure Delay", ylab = "Departure Delay")
+```
+
+*In the lecture, we created a scatter plot based on `ggplot()` syntax. Here's one using base `R`.*
+
+For delays less than 240 minutes (four hours), there's a strong and positive relationship between the delay of the previous flight and the delay of the current flight. After that, the relationship becomes more variable. After eight hours, a delayed flight is likely to be followed by a flight leaving on time.
+
+# Bucket flight status
+
+## 1. We can bucket flight status into three groups, `cancelled`, `on time`, and `late`. After that, compute the group summaries.
+
+```{r}
+# 1
+flights %>%
+mutate(arr_status = ifelse(is.na(arr_delay), "cancelled",
+                            ifelse(arr_delay <= 0, "on time", "late"))) %>%
+  group_by(arr_status) %>%
+  summarize(count = n())
+
+# 2 More convenient option for >2 categories
+flights %>%
+  mutate(arr_status = 
+           case_when(is.na(arr_delay) ~ "cancelled",
+                     arr_delay <= 0 ~ "on time",
+                     arr_delay > 0 ~ "late")) %>%
+  group_by(arr_status) %>%
+  summarize(count = n())
+```
+
+# Monthly mean departure delay
+
+## 1. Compute mean departure delay for each month and then order them in descending order.
+
+```{r}
+flights_small %>% group_by(month) %>%
+  summarize(mean_dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  arrange(desc(mean_dep_delay))
+```
+
+## 2. Find the five most delayed flights originated from JFK in 2013.
+
+```{r}
+flights %>% filter(origin == "JFK", year == 2013) %>%
+  arrange(desc(arr_delay)) %>%
+  head(5)
+```
+
+## 3. Find the fastest (highest average speed) flights.
+
+```{r}
+flights %>% mutate(speed = distance/air_time*60) %>%
+  arrange(desc(speed)) %>%
+  head(5)
+```
+
+# Destinations by the number of flights
+## 1. Display destination airports with more than 5000 flights originated from JFK in 2013..
+
+```{r}
+flights_small %>% group_by(dest) %>%
+  summarize(count = n()) %>%
+  filter(count > 5000)
+```
+
+# Additional questions
+## 1. Which destination receives the most flights in December?
+
+```{r}
+flights %>% filter(month == 12) %>%
+  count(dest, sort = TRUE)
+```
+
+## 2. Which carrier has the worst delays?
+
+```{r}
+flights %>% group_by(carrier) %>%
+  summarize(mean_arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(mean_arr_delay))
+```
+
+## 3. If you are flying to Baltimore (BWI) from New York, what time of day should you fly if you want to avoid delays as much as possible?
+
+```{r}
+flights %>% filter(dest == "BWI") %>%
+  group_by(hour) %>%
+  summarize(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+```
+
+## 4. How would you disentangle the effects of bad airports vs. bad carriers?
+
+    This question is slightly more challenging. There are many ways to approach it. We can attempt to disentangle the effects by comparing:
+
+    + the average delay of each carrier.
+
+    + the average delay of all other flights.
+
+We want to compare flights on the same route: flying from the same origin to the same destination.
+
+```{r}
+flights %>%
+  # remove cancelled flights
+  filter(!is.na(arr_delay)) %>%
+  # total minutes delayed by carrier within by origin-dest pair
+  group_by(origin, dest, carrier) %>%
+  summarize(arr_delay = sum(arr_delay),
+            n_flights = n()) %>%
+  # total minutes delayed within the same origin-dest pair
+  group_by(origin, dest) %>%
+  mutate(arr_delay_total = sum(arr_delay),
+         n_flights_total = sum(n_flights)) %>%
+  # diff = avg delay of each carrier - avg delay of other carriers
+  ungroup() %>%
+  mutate(arr_delay = (arr_delay_total - arr_delay)/(n_flights_total-n_flights),
+         arr_delay_mean = arr_delay/n_flights,
+         diff = arr_delay_mean - arr_delay) %>%
+  # remove -Inf values (when there is only one carrier flying that route)
+  filter(is.finite(arr_delay)) %>%
+  # avg difference in arrival delay by carrier
+  group_by(carrier) %>%
+  summarize(diff = mean(diff)) %>%
+  # sort data in descending order of diff - the "worst" carrier is put on top
+  arrange(desc(diff))
+```
+

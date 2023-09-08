@@ -1,0 +1,201 @@
+---
+title: "Week 11 Mini Lecture/Demo/Discussion"
+author: "Qian Jiang"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{=html}
+<style>body {text-align: justify}</style>
+```
+
+
+Using `LR_train.csv` and `LR_test.csv`, answer the following questions. Before answering, load the following libraries.
+
+```{r}
+library(tidyverse)
+library(PerformanceAnalytics)
+library(pROC)
+source("helperfunctions.R")
+```
+
+##### **A. Ask**
+
+**1. Describe the business problem. Explain why the business problem is relevant to the company/department.**
+
+WorldTel is a telco company providing phone and internet services to customers. WorldTel is experiencing a high volume of churn in its customers, as they move to competitors who have entered the market recently. WorldTel needs to curtail the loss in revenue, by intervening early and retaining customers. It needs to do so with limited budget on customer retention programs. 
+
+**2. State the business aim or question.**
+
+The business aim is to develop a regression model using customer data from the previous year, to predict the likelihood of customers to churn. The predictions should guide the customer retention programs to maximise the overall profit margin in the next 2 years. 
+
+##### **B. Acquire**
+
+**1. Load `LR_train.csv` into the variable `train` and `LR_test.csv` into the variable `test`. How large is the train and test data? **
+
+```{r}
+train <- read.csv("../data/LR_train.csv", stringsAsFactors=TRUE)
+test <- read.csv("../data/LR_test.csv", stringsAsFactors=TRUE)
+```
+
+**2. Inspect the structure of the dataset. State the number of rows and columns in the dataset. For each column, state whether the variable is continuous, categorical, count etc.**
+
+```{r}
+str(train)
+```
+
+**3. Change the default reference levels in `internet_service` as "No", `contract` as "Two year" and `payment_method` as "Mailed Check".**
+
+```{r}
+levels(train$internet_service) <- c("No", "DSL", "FiberOptic")
+levels(test$internet_service) <- c("No", "DSL", "FiberOptic")
+levels(train$contract) <- c("TwoYear", "MonthToMonth", "OneYear")
+levels(test$contract) <- c("TwoYear", "MonthToMonth", "OneYear")
+levels(train$payment_method) <- c("MailedCheck", "BankTransferAutomatic", "CreditCardAutomatic", "ElectronicCheck")
+levels(test$payment_method) <- c("MailedCheck", "BankTransferAutomatic", "CreditCardAutomatic", "ElectronicCheck")
+```
+
+##### **C. Analyse**
+
+##### **Exploratory Data Analysis**
+
+**1. Describe and visualise the dependent variable, `churn`. What proportion of customers churn in the train and test data? Is the data balanced?**
+
+```{r}
+# Bar plot of churn (train)
+ggplot(train) + geom_bar(aes(x=churn, fill=churn))
+
+# Proportion of churn (train)
+train %>% 
+  group_by(churn) %>% 
+  summarise(prop = n()/nrow(train))
+
+# Bar plot of churn (test)
+ggplot(test) + geom_bar(aes(x=churn, fill=churn))
+
+# Proportion of churn (test)
+test %>% 
+  group_by(churn) %>% 
+  summarise(prop = n()/nrow(test))
+```
+
+**2.  Visualise the correlation between the independent continuous variables `tenure`, `monthly_charges`, `total_charges`. Which variable can be removed to reduce multicollinearity issues? **
+
+```{r}
+numvars <- unlist(lapply(train, is.numeric))  
+chart.Correlation(train[,numvars], histogram=TRUE)
+```
+
+##### **Predictive Analytics**
+
+**1. Fit a logistic regression model on `train`.**
+
+```{r}
+mod1 <- glm(formula=churn~.,
+            family="binomial", data=train)
+summary(mod1)
+```
+
+**2. Perform automatic backward selection to ensure that all coefficient estimates are significant at the 5% level of statistical significance.**
+
+```{r}
+trainm <- data.frame(model.matrix(mod1)[,-1]) %>%
+  mutate(churn=train$churn)
+testm <- data.frame(model.matrix(glm(
+  formula=churn~.,
+  family="binomial", data=test))[,-1]) %>%
+  mutate(churn=test$churn)
+```
+
+```{r}
+mod2 <- sig_removal(glmobject=mod1, response="churn", sig=0.05, data=trainm)
+summary(mod2)
+```
+
+**3. Using the logistic regression model with a threshold of 0.5, generate predictions for the first two observations in `train`. Classify each of these predictions as true positives, true negatives, false positives or false negatives. Explain.**
+
+```{r}
+# Observation 1
+predict(mod2, newdata=trainm[1,], type="response")
+trainm[1,"churn"]
+
+# Observation 2
+predict(mod2, newdata=trainm[2,], type="response")
+trainm[2,"churn"]
+```
+
+**4. Using the logistic regression model with a threshold of 0.5, generate the confusion matrix for `train`.**
+
+```{r}
+y_true <- trainm$churn
+y_prob <- predict(mod2, newdat=trainm, type="response")
+y_pred <- ifelse(y_prob>0.5, "Yes", "No")
+confusion_matrix <- table(y_true, y_pred)
+
+TN <- confusion_matrix[1,1]
+TP <- confusion_matrix[2,2]
+FP <- confusion_matrix[1,2]
+FN <- confusion_matrix[2,1]
+```
+
+**5. Calculate the accuracy of the logistic regression model.**
+
+```{r}
+accuracy <- (TP + TN)/(TP + TN + FP + FN)
+accuracy
+```
+
+**6. Calculate the sensitivity of the logistic regression model.**
+
+```{r}
+all_positives <- TP + FN
+sensitivity <- TP/all_positives
+sensitivity
+```
+
+**7. Calculate the specificity of the logistic regression model.**
+
+```{r}
+all_negatives <- TN + FP 
+specificity <- TN/all_negatives
+specificity
+```
+
+**8. Calculate the precision of the logistic regression model.**
+
+```{r}
+all_pred_positives <- FP + TP 
+precision <- TP/all_pred_positives
+precision
+```
+
+**9. Calculate the F1-Score of the logistic regression model.**
+
+```{r}
+recall <- sensitivity 
+f1_score <- (2 * precision * recall) /(precision + recall)
+f1_score
+```
+
+**10. Plot the ROC Curve of the logistic regression model. Hence, or otherwise, calculate the Area Under Curve (AUC) of the model.**
+
+```{r}
+rocobj <- roc(y_true, y_prob)
+plot(rocobj, legacy.axes = TRUE, print.auc = TRUE)
+auc <- auc(rocobj)
+auc
+```
+
+**11 Use `eval_logistic_model()` to generate the evaluation metrics for a logistic regression model which uses a threshold of 0.5 and 0.6 respectively.**
+
+```{r}
+# Evaluation metrics for train/test on mod3 with threshold 0.5
+eval_logistic_model(mod2, trainm, 0.5)
+eval_logistic_model(mod2, testm, 0.5)
+```
+
+```{r}
+# Evaluation metrics for train/test on mod3 with threshold 0.6
+eval_logistic_model(mod2, trainm, 0.6)
+eval_logistic_model(mod2, testm, 0.6)
+```
